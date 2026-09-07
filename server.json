@@ -1,0 +1,34 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "org.scoutee/scoutee",
+  "title": "Scoutee",
+  "description": "Search 200k+ public tenders from Europe and North America (87 official sources, 32 countries).",
+  "version": "1.0.0",
+  "websiteUrl": "https://scoutee.org",
+  "repository": {
+    "url": "https://github.com/qchantel/scoutee-mcp",
+    "source": "github",
+    "id": "1360228821"
+  },
+  "icons": [
+    {
+      "src": "https://raw.githubusercontent.com/qchantel/scoutee-mcp/main/logo-512.png",
+      "mimeType": "image/png",
+      "sizes": ["512x512"]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://scoutee.org/api/mcp",
+      "headers": [
+        {
+          "name": "X-API-Key",
+          "description": "Scoutee workspace API key (sct_...)",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

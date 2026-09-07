@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "scoutee": {
+      "type": "http",
+      "url": "https://scoutee.org/api/mcp",
+      "headers": {
+        "X-API-Key": "sct_your_key_here"
+      }
+    }
+  }
+}
