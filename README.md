@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://scoutee.org">scoutee.org</a> ·
-  <a href="https://scoutee.org/en/api-docs">API reference</a> ·
+  <a href="https://scoutee.org/en/mcp-public-tenders">MCP server page</a> · <a href="https://scoutee.org/en/api-docs">API reference</a> ·
   <a href="https://scoutee.org/pricing">Pricing</a>
 </p>
 
@@ -33,7 +33,7 @@ code: the server is hosted by Scoutee and you connect to it over HTTPS.
 | **Auth** | `X-API-Key: sct_...` header (`Authorization: Bearer sct_...` is also accepted) |
 | **Tools** | `search_tenders`, `get_tender` — both read-only |
 | **Quota** | 10,000 searches per hour per key |
-| **Docs** | https://scoutee.org/en/api-docs |
+| **Docs** | https://scoutee.org/en/mcp-public-tenders (French: https://scoutee.org/fr/mcp-appels-d-offres) |
 
 ## Getting an API key
 
@@ -223,7 +223,8 @@ This server is published to the official MCP Registry as `org.scoutee/scoutee`. 
 ## Links
 
 - Website — https://scoutee.org
-- Developer reference (REST + MCP) — https://scoutee.org/en/api-docs (French:
+- MCP server page — https://scoutee.org/en/mcp-public-tenders (French: https://scoutee.org/fr/mcp-appels-d-offres)
+- Developer reference (REST) — https://scoutee.org/en/api-docs (French:
   https://scoutee.org/fr/documentation-api)
 - Pricing — https://scoutee.org/pricing
 - Contact — contact@scoutee.org
