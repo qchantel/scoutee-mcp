@@ -1,0 +1,13 @@
+{
+  "name": "scoutee-procurement",
+  "version": "1.1.0",
+  "description": "Find and compare public procurement opportunities with Scoutee.",
+  "author": {
+    "name": "Scoutee",
+    "url": "https://scoutee.org"
+  },
+  "homepage": "https://scoutee.org/en/mcp-public-tenders",
+  "repository": "https://github.com/qchantel/scoutee-mcp",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

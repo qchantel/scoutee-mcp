@@ -2,7 +2,7 @@
   "mcpServers": {
     "scoutee": {
       "type": "http",
-      "url": "https://scoutee.org/api/mcp/public"
+      "url": "https://scoutee.org/api/mcp"
     }
   }
 }

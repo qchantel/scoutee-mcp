@@ -1,0 +1,30 @@
+{
+  "name": "scoutee-procurement",
+  "version": "1.1.0",
+  "description": "Find and compare public procurement opportunities with Scoutee.",
+  "author": {
+    "name": "Scoutee",
+    "url": "https://scoutee.org"
+  },
+  "homepage": "https://scoutee.org/en/mcp-public-tenders",
+  "repository": "https://github.com/qchantel/scoutee-mcp",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Scoutee Procurement",
+    "developerName": "Scoutee",
+    "shortDescription": "Find public tenders and build a shortlist.",
+    "longDescription": "Search real tender notices, compare deadlines and budgets, and open Scoutee for deeper analysis.",
+    "category": "Productivity",
+    "capabilities": [
+      "Read"
+    ],
+    "websiteURL": "https://scoutee.org",
+    "privacyPolicyURL": "https://scoutee.org/en/privacy",
+    "termsOfServiceURL": "https://scoutee.org/en/terms",
+    "defaultPrompt": [
+      "Find tenders matching my business.",
+      "Compare these tender opportunities."
+    ]
+  }
+}
