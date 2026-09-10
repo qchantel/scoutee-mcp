@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://scoutee.org">scoutee.org</a> ·
   <a href="https://scoutee.org/en/mcp-public-tenders">MCP server page</a> · <a href="https://scoutee.org/en/api-docs">API reference</a> ·
-  <a href="https://scoutee.org/pricing">Pricing</a>
+  <a href="https://scoutee.org/en/pricing">Pricing</a>
 </p>
 
 ---
@@ -19,9 +19,10 @@
 ## What Scoutee is
 
 Scoutee is a public procurement monitoring service. Every day it collects the tenders published by
-official journals and buyer platforms across Europe (TED and the national portals of 30 countries)
+official journals and buyer platforms across Europe (TED and national portals)
 and North America (SAM.gov, CanadaBuys, SEAO), deduplicates them into one row per notice, and stores
-them in a single searchable database — **200,000+ notices, 87 sources, 32 countries**.
+them in a single searchable database. See the current [sources](https://scoutee.org/en/sources)
+and [public search](https://scoutee.org/en/search) for coverage and available notices.
 
 This repository is the **documentation** for Scoutee's hosted MCP server. It contains no product
 code: the server is hosted by Scoutee and you connect to it over HTTPS.
@@ -29,17 +30,51 @@ code: the server is hosted by Scoutee and you connect to it over HTTPS.
 | | |
 |---|---|
 | **Endpoint** | `https://scoutee.org/api/mcp` |
+| **Free public endpoint** | `https://scoutee.org/api/mcp/public` — no account or key required |
 | **Transport** | Streamable HTTP (stateless, JSON responses). No SSE, no stdio package. |
-| **Auth** | `X-API-Key: sct_...` header (`Authorization: Bearer sct_...` is also accepted) |
+| **Auth** | The main endpoint accepts workspace API keys or OAuth. The public endpoint is anonymous. |
 | **Tools** | `search_tenders`, `get_tender` — both read-only |
-| **Quota** | 10,000 searches per hour per key |
+| **Quota** | Workspace plan limits; public previews are limited per IP address. See [current API quotas](https://scoutee.org/en/api-docs). |
 | **Docs** | https://scoutee.org/en/mcp-public-tenders (French: https://scoutee.org/fr/mcp-appels-d-offres) |
 
-## Getting an API key
+## Try the free public endpoint
+
+The public endpoint exposes two read-only tools: `search_public_tenders` and `get_public_tender`.
+They return a notice's public preview: title, buyer, country, location, deadline, estimated value,
+publishing portal and its page on Scoutee. Reading a notice also returns its procedure, CPV codes and
+a description excerpt. Search returns up to ten notices per page and three pages per query.
+
+```bash
+claude mcp add --transport http scoutee-public https://scoutee.org/api/mcp/public
+```
+
+For a client that accepts an `mcpServers` configuration:
+
+```json
+{
+  "mcpServers": {
+    "scoutee-public": {
+      "type": "http",
+      "url": "https://scoutee.org/api/mcp/public"
+    }
+  }
+}
+```
+
+No credentials are required. The public preview does not expose full descriptions, tender documents,
+saved searches or AI analysis. Results link to Scoutee for the account-based product.
+
+## Connecting an account
+
+The main endpoint, `https://scoutee.org/api/mcp`, also supports OAuth: compatible clients open a
+Scoutee sign-in and consent page, where the user chooses a workspace. OAuth works on any plan,
+including Free, within that workspace's limits. See the [connection guide](https://scoutee.org/en/mcp-public-tenders).
+
+For scripts or clients that use an API key:
 
 1. Create an account at [scoutee.org](https://scoutee.org).
-2. Subscribe to the **Standard** plan ([pricing](https://scoutee.org/pricing)) — the API and the MCP
-   server require a paid workspace.
+2. Use a paid workspace: **Pro** or **Team** ([pricing](https://scoutee.org/en/pricing)). Creating and
+   using an API key requires a paid plan; the anonymous endpoint above does not.
 3. Open your workspace page, section **API**, and create a key. It looks like `sct_...`.
 4. Keys can be revoked at any time from the same page.
 
@@ -181,9 +216,9 @@ Example result:
   "page_size": 20,
   "pages": 7,
   "by_country": { "France": 98, "Belgium": 21, "Europe": 18 },
-  "quota_plan": "standard",
-  "quota_limit": 10000,
-  "quota_remaining": 9987
+  "quota_plan": "pro",
+  "quota_limit": 100,
+  "quota_remaining": 87
 }
 ```
 
@@ -208,10 +243,12 @@ Returns a single tender object, identical in shape to one entry of `items` above
 
 ## Quotas and errors
 
-- **10,000 searches per hour per key.** Every `search_tenders` result carries `quota_plan`,
+- **100 searches per hour on Pro; 300 on Team**, shared across the workspace's REST and MCP access.
+  Every `search_tenders` result carries `quota_plan`,
   `quota_limit` and `quota_remaining`; `get_tender` does not consume quota.
 - Exceeding the quota returns a tool error with the same message the REST API would return (HTTP 429).
-- A missing, unknown or revoked key returns a tool error asking for `X-API-Key`.
+- The main endpoint requires a valid workspace API key or OAuth authorization. The separate public
+  endpoint requires neither and has its own limits.
 - Notices are returned in the language they were published in; nothing is translated. `url` always
   points at the notice on its source portal, which is where a bid is actually filed.
 
@@ -226,7 +263,7 @@ This server is published to the official MCP Registry as `org.scoutee/scoutee`. 
 - MCP server page — https://scoutee.org/en/mcp-public-tenders (French: https://scoutee.org/fr/mcp-appels-d-offres)
 - Developer reference (REST) — https://scoutee.org/en/api-docs (French:
   https://scoutee.org/fr/documentation-api)
-- Pricing — https://scoutee.org/pricing
+- Pricing — https://scoutee.org/en/pricing
 - Contact — contact@scoutee.org
 
 ## License
