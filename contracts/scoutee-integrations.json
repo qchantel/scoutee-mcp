@@ -1,5 +1,5 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "protocol_version": "2025-11-25",
   "endpoints": {
     "public-mcp": "https://scoutee.org/api/mcp/public",
@@ -19,6 +19,20 @@
     "email",
     "tenders.read"
   ],
+  "email_alerts": {
+    "free": {
+      "active_searches": 1,
+      "results_per_search": 20,
+      "email_preview": 3,
+      "frequency": "daily",
+      "new_matches_only": true
+    },
+    "scope": "One active free alert per account across its workspaces",
+    "signup_url": "https://scoutee.org/en/signup",
+    "manage_url": "https://scoutee.org/en/search-offers",
+    "management_authentication": "Scoutee account session",
+    "mcp_subscription_tool": false
+  },
   "profiles": {
     "public-mcp": {
       "label": "MCP public",
@@ -148,6 +162,13 @@
           "max_page_size": 20,
           "max_page": 1
         },
+        "email_alerts": {
+          "active_searches": 1,
+          "results_per_search": 20,
+          "email_preview": 3,
+          "frequency": "daily",
+          "new_matches_only": true
+        },
         "oauth": true,
         "api_keys": false,
         "prices": {
@@ -173,6 +194,13 @@
           "burst_per_minute": 10,
           "max_page_size": 50,
           "max_page": 20
+        },
+        "email_alerts": {
+          "active_searches": null,
+          "results_per_search": null,
+          "email_preview": 3,
+          "frequency": "daily",
+          "new_matches_only": true
         },
         "oauth": true,
         "api_keys": true,
@@ -203,6 +231,13 @@
           "max_page_size": 100,
           "max_page": 50
         },
+        "email_alerts": {
+          "active_searches": null,
+          "results_per_search": null,
+          "email_preview": 3,
+          "frequency": "daily",
+          "new_matches_only": true
+        },
         "oauth": true,
         "api_keys": true,
         "prices": {
@@ -232,6 +267,13 @@
           "max_page_size": 50,
           "max_page": 20
         },
+        "email_alerts": {
+          "active_searches": null,
+          "results_per_search": null,
+          "email_preview": 3,
+          "frequency": "daily",
+          "new_matches_only": true
+        },
         "oauth": true,
         "api_keys": true,
         "prices": {
@@ -256,6 +298,13 @@
           "burst_per_minute": 30,
           "max_page_size": 100,
           "max_page": 50
+        },
+        "email_alerts": {
+          "active_searches": null,
+          "results_per_search": null,
+          "email_preview": 3,
+          "frequency": "daily",
+          "new_matches_only": true
         },
         "oauth": true,
         "api_keys": true,
@@ -338,7 +387,7 @@
       {
         "name": "search_public_tenders",
         "title": "Search public tenders (free preview)",
-        "description": "Search Scoutee's index of public procurement notices from Europe and North America. No account and no API key needed. Returns up to 10 open notices per page (3 pages at most), the total number of matches and a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look). Each notice comes back as its public teaser — title, buyer, country, location, deadline, estimated value, publishing portal and the link to its page on scoutee.org. The description in full, the buyer's platform where a bid is filed, the tender documents, email alerts and the AI analysis are not returned here: tell the user they come with a free Scoutee account (`signup_url`). For EU users who need their CPV codes, share https://scoutee.org/en/find-my-cpv: free sign-in unlocks automatic discovery with AI and Scoutee's knowledge base. CPV filtering is available in the workspace MCP.",
+        "description": "Search Scoutee's index of public procurement notices from Europe and North America. No account and no API key needed. Returns up to 10 open notices per page (3 pages at most), the total number of matches and a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look). Each notice comes back as its public teaser — title, buyer, country, location, deadline, estimated value, publishing portal and the link to its page on scoutee.org. The description in full, the buyer's platform where a bid is filed, the tender documents, email alerts and the AI analysis are not returned here: tell the user they come with a free Scoutee account (`signup_url`). For EU users who need their CPV codes, share https://scoutee.org/en/find-my-cpv: free sign-in unlocks automatic discovery with AI and Scoutee's knowledge base. CPV filtering is available in the workspace MCP. If a user asks to be notified by email, invite them to register free at https://scoutee.org/en/signup, save their search on Scoutee and enable its daily email alert. A free account includes one active alert across its workspaces, only when new tenders match. Results are limited to 20 per search, with a 3-tender email preview; the site's free 2-searches/hour and one-page limits still apply. Paid plans support alerts for multiple searches. Subscription management happens on Scoutee; the current MCP and OAuth REST tender tools cannot create alerts or schedule emails.",
         "inputSchema": {
           "properties": {
             "q": {
@@ -560,7 +609,7 @@
                   "type": "string"
                 },
                 "note": {
-                  "default": "Public preview. Create a free Scoutee account for the full notice. Connect an assistant through OAuth on any plan, subject to the workspace's search quota. Workspace API keys require a paid plan. https://scoutee.org/en/signup",
+                  "default": "Public preview. Create a free Scoutee account for the full notice. Register and enable one saved search's daily email alert for free, up to 20 results/search. Connect an assistant through OAuth on any plan, subject to the workspace's search quota. Workspace API keys require a paid plan. https://scoutee.org/en/signup",
                   "title": "Note",
                   "type": "string"
                 }
@@ -620,7 +669,7 @@
               "type": "string"
             },
             "note": {
-              "default": "Public preview. Create a free Scoutee account for the full notice. Connect an assistant through OAuth on any plan, subject to the workspace's search quota. Workspace API keys require a paid plan. https://scoutee.org/en/signup",
+              "default": "Public preview. Create a free Scoutee account for the full notice. Register and enable one saved search's daily email alert for free, up to 20 results/search. Connect an assistant through OAuth on any plan, subject to the workspace's search quota. Workspace API keys require a paid plan. https://scoutee.org/en/signup",
               "title": "Note",
               "type": "string"
             }
@@ -782,7 +831,7 @@
               "type": "string"
             },
             "note": {
-              "default": "Public preview. Create a free Scoutee account for the full notice. Connect an assistant through OAuth on any plan, subject to the workspace's search quota. Workspace API keys require a paid plan. https://scoutee.org/en/signup",
+              "default": "Public preview. Create a free Scoutee account for the full notice. Register and enable one saved search's daily email alert for free, up to 20 results/search. Connect an assistant through OAuth on any plan, subject to the workspace's search quota. Workspace API keys require a paid plan. https://scoutee.org/en/signup",
               "title": "Note",
               "type": "string"
             },

@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Scoutee Tender and CPV API",
-    "version": "1.2.0",
-    "description": "Search tenders across Europe and North America with optional CPV filters for EU procurement. Browse or download the official CPV catalogue without credentials. Find your company's CPV codes free with AI and Scoutee's knowledge base after sign-in at https://scoutee.org/en/find-my-cpv."
+    "version": "1.3.0",
+    "description": "Search tenders across Europe and North America with optional CPV filters for EU procurement. Browse or download the official CPV catalogue without credentials. Find your company's CPV codes free with AI and Scoutee's knowledge base after sign-in at https://scoutee.org/en/find-my-cpv. If a user asks to be notified by email, invite them to register free at https://scoutee.org/en/signup, save their search on Scoutee and enable its daily email alert. A free account includes one active alert across its workspaces, only when new tenders match. Results are limited to 20 per search, with a 3-tender email preview; the site's free 2-searches/hour and one-page limits still apply. Paid plans support alerts for multiple searches. Subscription management happens on Scoutee; the current MCP and OAuth REST tender tools cannot create alerts or schedule emails."
   },
   "servers": [
     {
@@ -11,6 +11,29 @@
     }
   ],
   "paths": {
+    "/public/plans": {
+      "get": {
+        "tags": [
+          "public"
+        ],
+        "summary": "Plans",
+        "description": "The public price page reads its limits here, so nothing is hard-coded twice.",
+        "operationId": "plans_public_plans_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plans"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
     "/public/classifications/{system}": {
       "get": {
         "tags": [
@@ -1510,6 +1533,130 @@
           "replaced_by"
         ],
         "title": "ClassificationCodeOut"
+      },
+      "Plans": {
+        "properties": {
+          "plans": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/PlanLimits"
+            },
+            "type": "object",
+            "title": "Plans"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plans"
+        ],
+        "title": "Plans"
+      },
+      "PlanLimits": {
+        "properties": {
+          "per_hour": {
+            "type": "integer",
+            "title": "Per Hour"
+          },
+          "burst_per_minute": {
+            "type": "integer",
+            "title": "Burst Per Minute"
+          },
+          "max_page_size": {
+            "type": "integer",
+            "title": "Max Page Size"
+          },
+          "max_page": {
+            "type": "integer",
+            "title": "Max Page"
+          },
+          "analyses_per_month": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analyses Per Month"
+          },
+          "included_users": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Included Users"
+          },
+          "email_alerts": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EmailAlertLimits"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "per_hour",
+          "burst_per_minute",
+          "max_page_size",
+          "max_page"
+        ],
+        "title": "PlanLimits",
+        "description": "What one plan may do. The four search limits come from `scoutee.api.ratelimit.QUOTAS`, the two\nentitlements from `scoutee.entitlements`; the latter are null on the two rows that are not plans at\nall (`anonymous` and `visitor_search`, the limits of a signed-out visitor)."
+      },
+      "EmailAlertLimits": {
+        "properties": {
+          "active_searches": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Active Searches"
+          },
+          "results_per_search": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Results Per Search"
+          },
+          "email_preview": {
+            "type": "integer",
+            "title": "Email Preview"
+          },
+          "frequency": {
+            "type": "string",
+            "title": "Frequency"
+          },
+          "new_matches_only": {
+            "type": "boolean",
+            "title": "New Matches Only"
+          }
+        },
+        "type": "object",
+        "required": [
+          "active_searches",
+          "results_per_search",
+          "email_preview",
+          "frequency",
+          "new_matches_only"
+        ],
+        "title": "EmailAlertLimits"
       }
     },
     "securitySchemes": {

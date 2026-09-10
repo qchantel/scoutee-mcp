@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "org.scoutee/scoutee",
   "title": "Scoutee",
-  "version": "1.2.0",
-  "description": "Find tenders in Europe and North America. Get your EU CPV codes free with AI on Scoutee.",
+  "version": "1.3.0",
+  "description": "Tender search + AI CPV finder. Register free: 1 daily email alert, up to 20 results/search.",
   "websiteUrl": "https://scoutee.org",
   "repository": {
     "url": "https://github.com/qchantel/scoutee-mcp",
