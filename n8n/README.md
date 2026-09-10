@@ -21,6 +21,14 @@ reduce late-arrival gaps. This is an at-least-once discovery feed, not a change/
 merged or edited after discovery require a separate reconciliation if your destination needs that.
 Server transactions that commit very late can exceed the overlap; adapt it to your ingestion SLA.
 
+For EU procurement, you can add optional `cpv` query parameters on **Fetch window**, such as
+`cpv=90911200-8`. Get codes for your business free in [Scoutee's AI CPV finder](https://scoutee.org/en/find-my-cpv):
+after sign-in, AI combines your company details with Scoutee's knowledge base. Review the suggestions,
+or browse the [official catalogue](https://scoutee.org/en/cpv), before adding them. A code matches its
+official descendants and combines with keywords using OR; country, value and date filters still apply.
+CPV is the common EU procurement standard; it does not replace US or Canadian classifications. Export
+the changed workflow and start a fresh cursor when changing these filters, as for keywords.
+
 An HTTP 429 stops the run before checkpointing. Honour the response's `Retry-After` before retrying;
 401/403 require credential, membership or plan repair. The template spaces pages by 6.1 seconds and
 makes no automatic immediate retries. Very large windows must be split rather than repeatedly retried.
