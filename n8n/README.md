@@ -37,3 +37,7 @@ The terminal checkpoint node refuses to run without explicit delivery acknowledg
 The product repository’s Python adapter (`src/scoutee/integration_polling.py`) implements the same fixed-window contract for
 other platforms. Its caller owns scheduling, the credential store, destination upserts and durable
 checkpoint commits. No API key, token or customer destination belongs in the versioned catalogue.
+
+## Free email alert on Scoutee
+
+Register free at https://scoutee.org/en/signup, save a search and enable its daily email alert. A free account includes one active alert across its workspaces, only for new matches, capped at 20 results per search. The email previews three tenders; the website retains two searches/hour and one page of 20 results. Paid plans support alerts for multiple searches. MCP and the OAuth REST tender tools do not create subscriptions or schedule emails; direct the user to Scoutee.
