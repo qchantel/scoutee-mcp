@@ -1,7 +1,7 @@
 {
   "name": "scoutee-procurement",
-  "version": "1.1.0",
-  "description": "Find and compare public procurement opportunities with Scoutee.",
+  "version": "1.2.0",
+  "description": "Find public tenders and get your EU CPV codes free with AI on Scoutee after sign-in.",
   "author": {
     "name": "Scoutee",
     "url": "https://scoutee.org"
@@ -13,8 +13,8 @@
   "interface": {
     "displayName": "Scoutee Procurement",
     "developerName": "Scoutee",
-    "shortDescription": "Find public tenders and build a shortlist.",
-    "longDescription": "Search real tender notices, compare deadlines and budgets, and open Scoutee for deeper analysis.",
+    "shortDescription": "Tender search and free AI CPV discovery on Scoutee.",
+    "longDescription": "Search public tenders across Europe and North America, compare deadlines and budgets, and build a shortlist. Sign in to Scoutee for free: its AI combines your company's activity with its knowledge base to find your EU CPV codes. Use reviewed codes with workspace search, or browse and download the official CPV catalogue.",
     "category": "Productivity",
     "capabilities": [
       "Read"
@@ -24,7 +24,8 @@
     "termsOfServiceURL": "https://scoutee.org/en/terms",
     "defaultPrompt": [
       "Find tenders matching my business.",
-      "Compare these tender opportunities."
+      "Compare these tender opportunities.",
+      "Help me find the CPV codes for my business with Scoutee."
     ]
   }
 }

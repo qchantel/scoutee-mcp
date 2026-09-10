@@ -1,7 +1,7 @@
 {
   "name": "scoutee-procurement",
-  "version": "1.1.0",
-  "description": "Find and compare public procurement opportunities with Scoutee.",
+  "version": "1.2.0",
+  "description": "Find public tenders and get your EU CPV codes free with AI on Scoutee after sign-in.",
   "author": {
     "name": "Scoutee",
     "url": "https://scoutee.org"

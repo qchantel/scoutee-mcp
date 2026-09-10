@@ -3,14 +3,39 @@
 # Scoutee MCP and integration packages
 
 Search public tenders across Europe and North America, then read and compare notices from your assistant.
+For EU procurement, filter workspace searches by **CPV (Common Procurement Vocabulary)**, the common
+public procurement standard across the EU.
 Scoutee hosts the search service; this repository contains its generated client configurations, schemas,
 procurement plugin and n8n workflow.
+
+## Your CPV codes, found for you
+
+Sign in to Scoutee for free: our AI combines your company's activity with our knowledge base to find
+relevant CPV codes automatically. Start with your company name or identifier, website, or activity
+description in the [free AI CPV finder](https://scoutee.org/en/find-my-cpv). Review the suggestions, then
+use them in workspace MCP or REST searches.
+
+Use `search_tenders` with `cpv: ["90911200-8"]`, or `GET /api/tenders?cpv=90911200-8&country=France`.
+Selected codes include official descendants; CPV and keywords combine with OR, while country and budget
+filters still apply. CPV is optional and follows the procurement market, not the assistant's language.
+
+The [official catalogue](https://scoutee.org/en/cpv) is free to browse and download. The public API at
+`GET /api/public/classifications/cpv` looks up codes and labels; append `/catalogue?format=csv` for a full
+CSV copy. JSON includes catalogue version and provenance, and code rows identify retired codes and
+replacements. These catalogue endpoints need no credentials.
+
+AI company discovery runs in Scoutee after sign-in. The anonymous MCP offers tender previews; CPV
+filtering is available through workspace MCP and authenticated REST. Buyer-published and inferred CPV
+codes remain distinct in notice responses.
+
+## Connect to Scoutee
 
 | Access | Endpoint | Credentials |
 | --- | --- | --- |
 | Public preview | `https://scoutee.org/api/mcp/public` | None |
 | Workspace notices | `https://scoutee.org/api/mcp` | OAuth on every plan, or a workspace key on a paid plan |
 | REST | `https://scoutee.org/api/tenders` | The same OAuth token or workspace key |
+| CPV catalogue | `https://scoutee.org/api/public/classifications/cpv` | None |
 
 MCP uses Streamable HTTP and JSON responses. GET returning 405 is expected; MCP calls use POST. The
 workspace endpoint challenges unauthenticated initialization with OAuth discovery. Public previews and

@@ -1,8 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Scoutee Tender API",
-    "version": "1.1.0"
+    "title": "Scoutee Tender and CPV API",
+    "version": "1.2.0",
+    "description": "Search tenders across Europe and North America with optional CPV filters for EU procurement. Browse or download the official CPV catalogue without credentials. Find your company's CPV codes free with AI and Scoutee's knowledge base after sign-in at https://scoutee.org/en/find-my-cpv."
   },
   "servers": [
     {
@@ -10,6 +11,188 @@
     }
   ],
   "paths": {
+    "/public/classifications/{system}": {
+      "get": {
+        "tags": [
+          "classifications"
+        ],
+        "summary": "Search the official CPV catalogue",
+        "description": "Look up Common Procurement Vocabulary codes, the common EU procurement standard. No account or API key is required. Search labels or codes, resolve up to 50 exact codes, or browse a parent's children. For AI suggestions based on a company, use Scoutee's free signed-in finder at https://scoutee.org/en/find-my-cpv. Use reviewed codes with the authenticated tender search.",
+        "operationId": "lookup_public_classifications__system__get",
+        "parameters": [
+          {
+            "name": "system",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "System"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "description": "Code or activity keywords; returns up to 50 matches.",
+              "default": "",
+              "title": "Q"
+            },
+            "description": "Code or activity keywords; returns up to 50 matches."
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 5,
+              "description": "Label language, such as en, fr or de.",
+              "default": "en",
+              "title": "Locale"
+            },
+            "description": "Label language, such as en, fr or de."
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 50
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Exact codes; takes precedence over parent and q.",
+              "title": "Code"
+            },
+            "description": "Exact codes; takes precedence over parent and q."
+          },
+          {
+            "name": "parent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 8
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Eight-digit parent code; takes precedence over q.",
+              "title": "Parent"
+            },
+            "description": "Eight-digit parent code; takes precedence over q."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogueLookupOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/public/classifications/{system}/catalogue": {
+      "get": {
+        "tags": [
+          "classifications"
+        ],
+        "summary": "Download Scoutee's versioned copy of the CPV catalogue",
+        "description": "Download the full official CPV catalogue with localized labels, hierarchy, retired status and replacement codes. No account or API key is required. JSON includes catalogue version and source metadata; CSV contains the code rows. CPV is the common EU procurement standard.",
+        "operationId": "download_public_classifications__system__catalogue_get",
+        "parameters": [
+          {
+            "name": "system",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "System"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]{2}$",
+              "default": "en",
+              "title": "Locale"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(json|csv)$",
+              "default": "json",
+              "title": "Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              },
+              "text/csv": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
     "/tenders": {
       "get": {
         "tags": [
@@ -116,6 +299,26 @@
                 }
               ],
               "title": "Keyword"
+            }
+          },
+          {
+            "name": "cpv",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 50
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cpv"
             }
           },
           {
@@ -520,6 +723,13 @@
             "type": "array",
             "title": "Cpv Codes"
           },
+          "cpv_inferred_codes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Cpv Inferred Codes"
+          },
           "sectors": {
             "items": {
               "type": "string"
@@ -627,6 +837,16 @@
                 "type": "null"
               }
             ]
+          },
+          "procurement": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProcurementFacts"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -651,6 +871,397 @@
           "closed_at"
         ],
         "title": "TenderOut"
+      },
+      "ProcurementFacts": {
+        "properties": {
+          "procedure": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Procedure"
+          },
+          "contract_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Type"
+          },
+          "execution_location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Location"
+          },
+          "renewals": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Renewals"
+          },
+          "variants_allowed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variants Allowed"
+          },
+          "duration_months": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Months"
+          },
+          "offer_validity_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Offer Validity Days"
+          },
+          "questions_deadline_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Questions Deadline At"
+          },
+          "start_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start At"
+          },
+          "dates": {
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "object",
+            "title": "Dates"
+          },
+          "budget_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budget Text"
+          },
+          "estimated_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Value"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "lots": {
+            "items": {
+              "$ref": "#/components/schemas/ProcurementLot"
+            },
+            "type": "array",
+            "title": "Lots"
+          },
+          "award_criteria": {
+            "items": {
+              "$ref": "#/components/schemas/AwardCriterion"
+            },
+            "type": "array",
+            "title": "Award Criteria"
+          },
+          "mandatory_documents": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Mandatory Documents"
+          },
+          "requirements": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Requirements"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "title": "ProcurementFacts"
+      },
+      "AwardCriterion": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight"
+          },
+          "weight_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Value"
+          },
+          "weight_unit": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "percent",
+                  "points"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Unit"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "lot_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lot Number"
+          },
+          "subcriteria": {
+            "items": {
+              "$ref": "#/components/schemas/CriterionPart"
+            },
+            "type": "array",
+            "title": "Subcriteria"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "AwardCriterion"
+      },
+      "CriterionPart": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight"
+          },
+          "weight_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Value"
+          },
+          "weight_unit": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "percent",
+                  "points"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Weight Unit"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CriterionPart"
+      },
+      "ProcurementLot": {
+        "properties": {
+          "number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Number"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "ProcurementLot"
       },
       "AnalysisState": {
         "properties": {
@@ -776,6 +1387,129 @@
           "pages"
         ],
         "title": "TenderPage"
+      },
+      "CatalogueLookupOut": {
+        "properties": {
+          "system": {
+            "type": "string",
+            "const": "cpv",
+            "title": "System"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ClassificationCodeOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total_codes": {
+            "type": "integer",
+            "title": "Total Codes",
+            "description": "Total code count in the catalogue, not the current match count."
+          },
+          "catalogue": {
+            "$ref": "#/components/schemas/CatalogueMetadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "system",
+          "items",
+          "total_codes",
+          "catalogue"
+        ],
+        "title": "CatalogueLookupOut"
+      },
+      "CatalogueMetadata": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "Scoutee's versioned catalogue snapshot identifier."
+          },
+          "nomenclature_version": {
+            "type": "string",
+            "title": "Nomenclature Version",
+            "description": "Official nomenclature edition, such as CPV 2008."
+          },
+          "sha256": {
+            "type": "string",
+            "title": "Sha256",
+            "description": "SHA-256 digest of the imported catalogue snapshot."
+          },
+          "source": {
+            "type": "string",
+            "title": "Source",
+            "description": "Official source URL recorded for this catalogue snapshot."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "version",
+          "nomenclature_version",
+          "sha256",
+          "source"
+        ],
+        "title": "CatalogueMetadata"
+      },
+      "ClassificationCodeOut": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "Eight-digit CPV code accepted by the tender search's cpv parameter."
+          },
+          "display_code": {
+            "type": "string",
+            "title": "Display Code",
+            "description": "CPV code including its official check digit."
+          },
+          "label": {
+            "type": "string",
+            "title": "Label",
+            "description": "Catalogue label in the requested language, with English fallback."
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent",
+            "description": "Parent code in the official hierarchy, or null at the root."
+          },
+          "retired": {
+            "type": "boolean",
+            "title": "Retired",
+            "description": "Whether this code has been retired in this catalogue snapshot."
+          },
+          "replaced_by": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Replaced By",
+            "description": "Replacement codes recorded in the catalogue, if any."
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "display_code",
+          "label",
+          "parent",
+          "retired",
+          "replaced_by"
+        ],
+        "title": "ClassificationCodeOut"
       }
     },
     "securitySchemes": {

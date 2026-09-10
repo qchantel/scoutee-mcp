@@ -1,10 +1,12 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "protocol_version": "2025-11-25",
   "endpoints": {
     "public-mcp": "https://scoutee.org/api/mcp/public",
     "workspace-mcp": "https://scoutee.org/api/mcp",
     "rest": "https://scoutee.org/api/tenders",
+    "cpv-lookup": "https://scoutee.org/api/public/classifications/{system}",
+    "cpv-catalogue": "https://scoutee.org/api/public/classifications/{system}/catalogue",
     "oauth-register": "https://scoutee.org/api/oauth/register",
     "oauth-authorize": "https://scoutee.org/api/oauth/authorize",
     "oauth-token": "https://scoutee.org/api/oauth/token",
@@ -109,6 +111,27 @@
       "tests": [
         "tests/functional/test_oauth.py"
       ]
+    }
+  },
+  "cpv": {
+    "name": "Common Procurement Vocabulary",
+    "standard": "Common public procurement standard across the EU",
+    "optional": true,
+    "search_parameter": "cpv",
+    "search_profiles": [
+      "rest",
+      "workspace-mcp"
+    ],
+    "catalogue": {
+      "authentication": "none",
+      "lookup_url": "https://scoutee.org/api/public/classifications/cpv",
+      "download_url": "https://scoutee.org/api/public/classifications/cpv/catalogue",
+      "website_url": "https://scoutee.org/en/cpv"
+    },
+    "ai_finder": {
+      "url": "https://scoutee.org/en/find-my-cpv",
+      "authentication": "Free Scoutee account",
+      "description": "AI and Scoutee's knowledge base identify CPV codes for your business."
     }
   },
   "product": {
@@ -315,7 +338,7 @@
       {
         "name": "search_public_tenders",
         "title": "Search public tenders (free preview)",
-        "description": "Search Scoutee's index of public procurement notices from Europe and North America. No account and no API key needed. Returns up to 10 open notices per page (3 pages at most), the total number of matches and a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look). Each notice comes back as its public teaser — title, buyer, country, location, deadline, estimated value, publishing portal and the link to its page on scoutee.org. The description in full, the buyer's platform where a bid is filed, the tender documents, email alerts and the AI analysis are not returned here: tell the user they come with a free Scoutee account (`signup_url`).",
+        "description": "Search Scoutee's index of public procurement notices from Europe and North America. No account and no API key needed. Returns up to 10 open notices per page (3 pages at most), the total number of matches and a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look). Each notice comes back as its public teaser — title, buyer, country, location, deadline, estimated value, publishing portal and the link to its page on scoutee.org. The description in full, the buyer's platform where a bid is filed, the tender documents, email alerts and the AI analysis are not returned here: tell the user they come with a free Scoutee account (`signup_url`). For EU users who need their CPV codes, share https://scoutee.org/en/find-my-cpv: free sign-in unlocks automatic discovery with AI and Scoutee's knowledge base. CPV filtering is available in the workspace MCP.",
         "inputSchema": {
           "properties": {
             "q": {
@@ -824,7 +847,7 @@
       {
         "name": "search_tenders",
         "title": "Search public tenders",
-        "description": "Search Scoutee's index of public procurement notices from Europe and North America. Returns a page of notices, the total number of matches, a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look) and what the caller's hourly quota has left. Open notices only and newest first unless asked otherwise; notices published on several portals appear once, the other portals listed in `also_on`. Each search consumes one quota unit.",
+        "description": "Search public tenders across Europe and North America by keyword, country, budget, or optional CPV codes for EU procurement. Need the company's codes? Scoutee's free signed-in AI finder uses its knowledge base at https://scoutee.org/en/find-my-cpv. Returns a page of notices, the total number of matches, a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look) and what the caller's hourly quota has left. Open notices only and newest first unless asked otherwise; notices published on several portals appear once, the other portals listed in `also_on`. Each search consumes one quota unit.",
         "inputSchema": {
           "properties": {
             "q": {
@@ -857,6 +880,23 @@
               "description": "Keywords matched as whole words (plural tolerated) in title, buyer or description, plus the cached translations of each keyword on the portals of that language — the way to search across countries without translating anything yourself. Several keywords widen the search (a notice matching any of them is returned).",
               "title": "Keyword"
             },
+            "cpv": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 50,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Optional Common Procurement Vocabulary codes, the EU procurement standard (eight digits, optional verified check digit). Includes official descendants and widens keywords with OR; country and budget filters still apply. Only CPV-market sources can match. Validate codes with /api/public/classifications/cpv; unknown codes return an error.",
+              "title": "Cpv"
+            },
             "country": {
               "anyOf": [
                 {
@@ -872,19 +912,6 @@
               "default": null,
               "description": "Countries of the publishing portal, by their English name as Scoutee stores it ('France', 'Germany', 'United States', 'Canada'; 'Europe' for TED). Several countries add up. Omit to search everywhere — the `by_country` map of any result lists the exact values in use.",
               "title": "Country"
-            },
-            "source_id": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "default": null,
-              "description": "Restrict to a single portal, by its Scoutee source identifier.",
-              "title": "Source Id"
             },
             "min_value": {
               "anyOf": [
@@ -1053,6 +1080,423 @@
               "title": "AnalysisState",
               "type": "object"
             },
+            "AwardCriterion": {
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "weight": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight"
+                },
+                "weight_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Value"
+                },
+                "weight_unit": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "percent",
+                        "points"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Unit"
+                },
+                "source": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source"
+                },
+                "lot_number": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Lot Number"
+                },
+                "subcriteria": {
+                  "items": {
+                    "$ref": "#/$defs/CriterionPart"
+                  },
+                  "title": "Subcriteria",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "title": "AwardCriterion",
+              "type": "object"
+            },
+            "CriterionPart": {
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "weight": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight"
+                },
+                "weight_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Value"
+                },
+                "weight_unit": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "percent",
+                        "points"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Unit"
+                },
+                "source": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "title": "CriterionPart",
+              "type": "object"
+            },
+            "ProcurementFacts": {
+              "properties": {
+                "procedure": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Procedure"
+                },
+                "contract_type": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Contract Type"
+                },
+                "execution_location": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Execution Location"
+                },
+                "renewals": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Renewals"
+                },
+                "variants_allowed": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Variants Allowed"
+                },
+                "duration_months": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Duration Months"
+                },
+                "offer_validity_days": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Offer Validity Days"
+                },
+                "questions_deadline_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Questions Deadline At"
+                },
+                "start_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Start At"
+                },
+                "dates": {
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "title": "Dates",
+                  "type": "object"
+                },
+                "budget_text": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Budget Text"
+                },
+                "estimated_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Estimated Value"
+                },
+                "currency": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Currency"
+                },
+                "lots": {
+                  "items": {
+                    "$ref": "#/$defs/ProcurementLot"
+                  },
+                  "title": "Lots",
+                  "type": "array"
+                },
+                "award_criteria": {
+                  "items": {
+                    "$ref": "#/$defs/AwardCriterion"
+                  },
+                  "title": "Award Criteria",
+                  "type": "array"
+                },
+                "mandatory_documents": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Mandatory Documents",
+                  "type": "array"
+                },
+                "requirements": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Requirements",
+                  "type": "array"
+                },
+                "language": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Language"
+                },
+                "confidence": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Confidence"
+                },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source Url"
+                },
+                "updated_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Updated At"
+                }
+              },
+              "title": "ProcurementFacts",
+              "type": "object"
+            },
+            "ProcurementLot": {
+              "properties": {
+                "number": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Number"
+                },
+                "title": {
+                  "title": "Title",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title"
+              ],
+              "title": "ProcurementLot",
+              "type": "object"
+            },
             "TenderOut": {
               "properties": {
                 "id": {
@@ -1162,6 +1606,13 @@
                   "title": "Cpv Codes",
                   "type": "array"
                 },
+                "cpv_inferred_codes": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Cpv Inferred Codes",
+                  "type": "array"
+                },
                 "sectors": {
                   "items": {
                     "type": "string"
@@ -1265,6 +1716,17 @@
                   "anyOf": [
                     {
                       "$ref": "#/$defs/AnalysisState"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null
+                },
+                "procurement": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/ProcurementFacts"
                     },
                     {
                       "type": "null"
@@ -1463,6 +1925,423 @@
               ],
               "title": "AnalysisState",
               "type": "object"
+            },
+            "AwardCriterion": {
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "weight": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight"
+                },
+                "weight_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Value"
+                },
+                "weight_unit": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "percent",
+                        "points"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Unit"
+                },
+                "source": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source"
+                },
+                "lot_number": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Lot Number"
+                },
+                "subcriteria": {
+                  "items": {
+                    "$ref": "#/$defs/CriterionPart"
+                  },
+                  "title": "Subcriteria",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "title": "AwardCriterion",
+              "type": "object"
+            },
+            "CriterionPart": {
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "weight": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight"
+                },
+                "weight_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Value"
+                },
+                "weight_unit": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "percent",
+                        "points"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Unit"
+                },
+                "source": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "title": "CriterionPart",
+              "type": "object"
+            },
+            "ProcurementFacts": {
+              "properties": {
+                "procedure": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Procedure"
+                },
+                "contract_type": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Contract Type"
+                },
+                "execution_location": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Execution Location"
+                },
+                "renewals": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Renewals"
+                },
+                "variants_allowed": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Variants Allowed"
+                },
+                "duration_months": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Duration Months"
+                },
+                "offer_validity_days": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Offer Validity Days"
+                },
+                "questions_deadline_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Questions Deadline At"
+                },
+                "start_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Start At"
+                },
+                "dates": {
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "title": "Dates",
+                  "type": "object"
+                },
+                "budget_text": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Budget Text"
+                },
+                "estimated_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Estimated Value"
+                },
+                "currency": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Currency"
+                },
+                "lots": {
+                  "items": {
+                    "$ref": "#/$defs/ProcurementLot"
+                  },
+                  "title": "Lots",
+                  "type": "array"
+                },
+                "award_criteria": {
+                  "items": {
+                    "$ref": "#/$defs/AwardCriterion"
+                  },
+                  "title": "Award Criteria",
+                  "type": "array"
+                },
+                "mandatory_documents": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Mandatory Documents",
+                  "type": "array"
+                },
+                "requirements": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Requirements",
+                  "type": "array"
+                },
+                "language": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Language"
+                },
+                "confidence": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Confidence"
+                },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source Url"
+                },
+                "updated_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Updated At"
+                }
+              },
+              "title": "ProcurementFacts",
+              "type": "object"
+            },
+            "ProcurementLot": {
+              "properties": {
+                "number": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Number"
+                },
+                "title": {
+                  "title": "Title",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title"
+              ],
+              "title": "ProcurementLot",
+              "type": "object"
             }
           },
           "properties": {
@@ -1573,6 +2452,13 @@
               "title": "Cpv Codes",
               "type": "array"
             },
+            "cpv_inferred_codes": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Cpv Inferred Codes",
+              "type": "array"
+            },
             "sectors": {
               "items": {
                 "type": "string"
@@ -1676,6 +2562,17 @@
               "anyOf": [
                 {
                   "$ref": "#/$defs/AnalysisState"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "procurement": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/ProcurementFacts"
                 },
                 {
                   "type": "null"
