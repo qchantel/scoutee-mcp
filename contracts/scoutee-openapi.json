@@ -72,10 +72,10 @@
                   "type": "null"
                 }
               ],
-              "description": "Exact codes; takes precedence over parent and q.",
+              "description": "Exact codes; takes precedence over parent and q. Unknown values are omitted.",
               "title": "Code"
             },
-            "description": "Exact codes; takes precedence over parent and q."
+            "description": "Exact codes; takes precedence over parent and q. Unknown values are omitted."
           },
           {
             "name": "parent",
