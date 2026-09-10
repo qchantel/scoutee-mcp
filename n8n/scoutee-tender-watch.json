@@ -1,0 +1,191 @@
+{
+  "name": "Scoutee tender watch",
+  "active": false,
+  "nodes": [
+    {
+      "id": "start",
+      "name": "Run manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "window",
+      "name": "Prepare window",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const state = $getWorkflowStaticData('global');\nconst until = new Date(Date.now() - 120000);\nconst since = state.scouteeCursor ? new Date(new Date(state.scouteeCursor).getTime() - 300000) : new Date(until.getTime() - 86400000);\nreturn [{json: {seen_after: since.toISOString(), seen_before: until.toISOString()}}];"
+      }
+    },
+    {
+      "id": "fetch",
+      "name": "Fetch window",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "url": "https://scoutee.org/api/tenders",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "seen_after",
+              "value": "={{ $json.seen_after }}"
+            },
+            {
+              "name": "seen_before",
+              "value": "={{ $json.seen_before }}"
+            },
+            {
+              "name": "page_size",
+              "value": "50"
+            },
+            {
+              "name": "country",
+              "value": "France"
+            },
+            {
+              "name": "keyword",
+              "value": "nettoyage"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "pagination": {
+            "pagination": {
+              "paginationMode": "updateAParameter",
+              "parameters": {
+                "parameters": [
+                  {
+                    "type": "query",
+                    "name": "page",
+                    "value": "={{ $pageCount + 1 }}"
+                  }
+                ]
+              },
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ $response.body.page >= $response.body.pages }}",
+              "requestInterval": 6100
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "validate",
+      "name": "Validate window",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// n8n Code node, run once for all input items. This source is inserted by the artifact generator.\nconst pages = $input.all().map((item) => item.json);\nif (!pages.length) throw new Error('No pages returned; keep the existing checkpoint.');\nconst first = pages[0];\nif (first.total > first.pages * first.page_size || pages.length !== first.pages) {\n  throw new Error('Window exceeds the plan page cap. Narrow the time window; do not advance the checkpoint.');\n}\nconst unique = new Map();\nfor (let index = 0; index < pages.length; index++) {\n  const page = pages[index];\n  if (page.page !== index + 1 || page.total !== first.total || page.pages !== first.pages) {\n    throw new Error('Pagination changed during the run. Retry the same time window.');\n  }\n  for (const notice of page.items) {\n    if (unique.has(notice.id)) throw new Error('Duplicate page: retry without moving the checkpoint.');\n    unique.set(notice.id, notice);\n  }\n}\nif (unique.size !== first.total) throw new Error('Incomplete window; keep the checkpoint.');\nreturn [{json: {items: [...unique.values()], window: $('Prepare window').first().json, delivery_confirmed: false}}];\n"
+      }
+    },
+    {
+      "id": "destination",
+      "name": "Configure destination",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "errorMessage": "Configure destination upserts by canonical tender ID. After all writes succeed, return this batch with delivery_confirmed=true to Commit checkpoint. See README.md."
+      }
+    },
+    {
+      "id": "checkpoint",
+      "name": "Commit checkpoint",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const batch = $input.first().json;\nif (batch.delivery_confirmed !== true || !batch.window?.seen_before) throw new Error('Destination has not acknowledged the complete batch.');\n$getWorkflowStaticData('global').scouteeCursor = batch.window.seen_before;\nreturn [{json: {checkpoint: batch.window.seen_before}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Run manually": {
+      "main": [
+        [
+          {
+            "node": "Prepare window",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare window": {
+      "main": [
+        [
+          {
+            "node": "Fetch window",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch window": {
+      "main": [
+        [
+          {
+            "node": "Validate window",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate window": {
+      "main": [
+        [
+          {
+            "node": "Configure destination",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configure destination": {
+      "main": [
+        [
+          {
+            "node": "Commit checkpoint",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "tags": []
+}

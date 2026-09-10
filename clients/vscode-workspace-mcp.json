@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "scoutee": {
+      "type": "http",
+      "url": "https://scoutee.org/api/mcp"
+    }
+  }
+}
