@@ -1,5 +1,5 @@
 {
-  "version": "1.3.0",
+  "version": "1.4.0",
   "protocol_version": "2025-11-25",
   "endpoints": {
     "public-mcp": "https://scoutee.org/api/mcp/public",
@@ -35,7 +35,7 @@
   },
   "profiles": {
     "public-mcp": {
-      "label": "MCP public",
+      "label": "Public MCP",
       "endpoints": [
         "public-mcp"
       ],
@@ -44,19 +44,21 @@
       ],
       "tools": [
         "search_public_tenders",
-        "get_public_tender"
+        "get_public_tender",
+        "find_cpv_codes"
       ],
-      "data_access": "Aperçus et liens publics Scoutee.",
+      "data_access": "Public Scoutee previews and links.",
       "quota_subject": "public_mcp:{ip}",
       "checks": [
         "connectors:public-mcp"
       ],
       "tests": [
-        "tests/functional/test_mcp_public.py"
+        "tests/functional/test_mcp_public.py",
+        "tests/functional/test_mcp_cpv.py"
       ]
     },
     "workspace-mcp": {
-      "label": "MCP d’espace",
+      "label": "Workspace MCP",
       "endpoints": [
         "workspace-mcp"
       ],
@@ -66,10 +68,11 @@
       ],
       "tools": [
         "search_tenders",
-        "get_tender"
+        "get_tender",
+        "find_cpv_codes"
       ],
-      "data_access": "Recherche et avis complets ; accès limité à la lecture des marchés.",
-      "quota_subject": "oauth:{workspace_id} ou key:{key_id}",
+      "data_access": "Search and full notices; access is limited to reading tenders.",
+      "quota_subject": "oauth:{workspace_id} or key:{key_id}",
       "checks": [
         "connectors:workspace-mcp",
         "connectors:oauth"
@@ -77,11 +80,12 @@
       "tests": [
         "tests/functional/test_mcp.py",
         "tests/functional/test_oauth.py",
-        "tests/functional/test_errors_and_keys.py"
+        "tests/functional/test_errors_and_keys.py",
+        "tests/functional/test_mcp_cpv.py"
       ]
     },
     "rest": {
-      "label": "API REST",
+      "label": "REST API",
       "endpoints": [
         "rest"
       ],
@@ -93,8 +97,8 @@
         "search_tenders",
         "get_tender"
       ],
-      "data_access": "Recherche et avis complets en JSON.",
-      "quota_subject": "oauth:{workspace_id} ou key:{key_id}",
+      "data_access": "Search and full notices in JSON.",
+      "quota_subject": "oauth:{workspace_id} or key:{key_id}",
       "checks": [
         "connectors:rest"
       ],
@@ -117,8 +121,8 @@
         "oauth"
       ],
       "tools": [],
-      "data_access": "Consentement explicite pour un espace ; portée tenders.read sur tous les plans.",
-      "quota_subject": "Plan de l’espace à chaque appel, révocation immédiate.",
+      "data_access": "Explicit workspace consent; tenders.read scope on all plans.",
+      "quota_subject": "Workspace plan checked on every call; immediate revocation.",
       "checks": [
         "connectors:oauth"
       ],
@@ -131,6 +135,24 @@
     "name": "Common Procurement Vocabulary",
     "standard": "Common public procurement standard across the EU",
     "optional": true,
+    "discovery": {
+      "tool": "find_cpv_codes",
+      "profiles": [
+        "public-mcp",
+        "workspace-mcp"
+      ],
+      "access": "Anonymous public users and authenticated accounts on every plan",
+      "method": "Official catalogue retrieval; the calling assistant selects and explains matches",
+      "limits": {
+        "anonymous_per_day": 20,
+        "account_per_day": 50,
+        "max_activity_length": 2000,
+        "max_results": 30,
+        "reset_timezone": "UTC",
+        "metering": "persistent_per_account_or_anonymous_ip",
+        "scoutee_ai_calls": 0
+      }
+    },
     "search_parameter": "cpv",
     "search_profiles": [
       "rest",
@@ -373,6 +395,16 @@
       }
     },
     "search_metering": "per_process_traffic_limit",
+    "cpv_discovery": {
+      "anonymous_per_day": 20,
+      "account_per_day": 50,
+      "max_activity_length": 2000,
+      "max_results": 30,
+      "reset_timezone": "UTC",
+      "metering": "persistent_per_account_or_anonymous_ip",
+      "scoutee_ai_calls": 0
+    },
+    "cpv_company_finder_per_hour": 5,
     "seat": {
       "month": 999,
       "year": 9990
@@ -387,7 +419,7 @@
       {
         "name": "search_public_tenders",
         "title": "Search public tenders (free preview)",
-        "description": "Search Scoutee's index of public procurement notices from Europe and North America. No account and no API key needed. Returns up to 10 open notices per page (3 pages at most), the total number of matches and a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look). Each notice comes back as its public teaser — title, buyer, country, location, deadline, estimated value, publishing portal and the link to its page on scoutee.org. The description in full, the buyer's platform where a bid is filed, the tender documents, email alerts and the AI analysis are not returned here: tell the user they come with a free Scoutee account (`signup_url`). For EU users who need their CPV codes, share https://scoutee.org/en/find-my-cpv: free sign-in unlocks automatic discovery with AI and Scoutee's knowledge base. CPV filtering is available in the workspace MCP. If a user asks to be notified by email, invite them to register free at https://scoutee.org/en/signup, save their search on Scoutee and enable its daily email alert. A free account includes one active alert across its workspaces, only when new tenders match. Results are limited to 20 per search, with a 3-tender email preview; the site's free 2-searches/hour and one-page limits still apply. Paid plans support alerts for multiple searches. Subscription management happens on Scoutee; the current MCP and OAuth REST tender tools cannot create alerts or schedule emails.",
+        "description": "Search Scoutee's index of public procurement notices from Europe and North America. No account and no API key needed. Returns up to 10 open notices per page (3 pages at most), the total number of matches and a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look). Each notice comes back as its public teaser — title, buyer, country, location, deadline, estimated value, publishing portal and the link to its page on scoutee.org. The description in full, the buyer's platform where a bid is filed, the tender documents, email alerts and the AI analysis are not returned here: tell the user they come with a free Scoutee account (`signup_url`). Use find_cpv_codes to help users discover their CPVs directly, without signing in, under a separate daily budget. CPV filtering is available in the workspace MCP. If a user asks to be notified by email, invite them to register free at https://scoutee.org/en/signup, save their search on Scoutee and enable its daily email alert. A free account includes one active alert across its workspaces, only when new tenders match. Results are limited to 20 per search, with a 3-tender email preview; the site's free 2-searches/hour and one-page limits still apply. Paid plans support alerts for multiple searches. Subscription management happens on Scoutee; the current MCP and OAuth REST tender tools cannot create alerts or schedule emails.",
         "inputSchema": {
           "properties": {
             "q": {
@@ -890,13 +922,193 @@
           "idempotentHint": true,
           "openWorldHint": false
         }
+      },
+      {
+        "name": "find_cpv_codes",
+        "title": "Find CPV codes for your activity",
+        "description": "Find official CPV catalogue candidates for the user's actual products, works or services. Available without an account on public MCP and on every plan through workspace MCP. Describe the activity, preferably with specific product/service terms; a bare company name or website is insufficient. Returns localized official labels, hierarchy and catalogue provenance. Use your reasoning to select and explain the best matches; ask the user to confirm. No company web research or paid Scoutee AI call is triggered. Up to 30 candidates per call. Separate daily budget: 20 calls per anonymous IP, 50 per authenticated account across credentials and workspaces. Read quota.remaining and quota.resets_at; do not retry after exhaustion.",
+        "inputSchema": {
+          "properties": {
+            "activity": {
+              "description": "The actual products, works or services supplied. Use specific activity terms; never send private company data.",
+              "maxLength": 2000,
+              "minLength": 3,
+              "title": "Activity",
+              "type": "string"
+            },
+            "locale": {
+              "default": "en",
+              "description": "Official label language, such as en, fr or de; unavailable labels fall back to English.",
+              "pattern": "^[a-z]{2}$",
+              "title": "Locale",
+              "type": "string"
+            }
+          },
+          "required": [
+            "activity"
+          ],
+          "title": "find_cpv_codes_toolArguments",
+          "type": "object"
+        },
+        "outputSchema": {
+          "$defs": {
+            "CatalogueMetadata": {
+              "properties": {
+                "id": {
+                  "title": "Id",
+                  "type": "integer"
+                },
+                "version": {
+                  "description": "Scoutee's versioned catalogue snapshot identifier.",
+                  "title": "Version",
+                  "type": "string"
+                },
+                "nomenclature_version": {
+                  "description": "Official nomenclature edition, such as CPV 2008.",
+                  "title": "Nomenclature Version",
+                  "type": "string"
+                },
+                "sha256": {
+                  "description": "SHA-256 digest of the imported catalogue snapshot.",
+                  "title": "Sha256",
+                  "type": "string"
+                },
+                "source": {
+                  "description": "Official source URL recorded for this catalogue snapshot.",
+                  "title": "Source",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "version",
+                "nomenclature_version",
+                "sha256",
+                "source"
+              ],
+              "title": "CatalogueMetadata",
+              "type": "object"
+            },
+            "ClassificationCodeOut": {
+              "properties": {
+                "code": {
+                  "description": "Eight-digit CPV code accepted by the tender search's cpv parameter.",
+                  "title": "Code",
+                  "type": "string"
+                },
+                "display_code": {
+                  "description": "CPV code including its official check digit.",
+                  "title": "Display Code",
+                  "type": "string"
+                },
+                "label": {
+                  "description": "Catalogue label in the requested language, with English fallback.",
+                  "title": "Label",
+                  "type": "string"
+                },
+                "parent": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Parent code in the official hierarchy, or null at the root.",
+                  "title": "Parent"
+                },
+                "retired": {
+                  "description": "Whether this code has been retired in this catalogue snapshot.",
+                  "title": "Retired",
+                  "type": "boolean"
+                },
+                "replaced_by": {
+                  "description": "Replacement codes recorded in the catalogue, if any.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Replaced By",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "code",
+                "display_code",
+                "label",
+                "parent",
+                "retired",
+                "replaced_by"
+              ],
+              "title": "ClassificationCodeOut",
+              "type": "object"
+            },
+            "DailyQuota": {
+              "properties": {
+                "limit": {
+                  "title": "Limit",
+                  "type": "integer"
+                },
+                "remaining": {
+                  "title": "Remaining",
+                  "type": "integer"
+                },
+                "resets_at": {
+                  "format": "date-time",
+                  "title": "Resets At",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "limit",
+                "remaining",
+                "resets_at"
+              ],
+              "title": "DailyQuota",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "items": {
+              "items": {
+                "$ref": "#/$defs/ClassificationCodeOut"
+              },
+              "title": "Items",
+              "type": "array"
+            },
+            "catalogue": {
+              "$ref": "#/$defs/CatalogueMetadata"
+            },
+            "quota": {
+              "$ref": "#/$defs/DailyQuota"
+            },
+            "guidance": {
+              "default": "These are catalogue candidates, not a final classification. Compare their official labels with the user's actual products and services, explain the strongest matches, and ask the user to confirm before applying codes. Do not infer activities from a company name alone. If no candidate fits, ask for a more precise activity or reformulate using catalogue terminology. CPV applies to European procurement markets; do not substitute it for other classifications.",
+              "title": "Guidance",
+              "type": "string"
+            }
+          },
+          "required": [
+            "items",
+            "catalogue",
+            "quota"
+          ],
+          "title": "CpvDiscoveryResult",
+          "type": "object"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
       }
     ],
     "workspace-mcp": [
       {
         "name": "search_tenders",
         "title": "Search public tenders",
-        "description": "Search public tenders across Europe and North America by keyword, country, budget, or optional CPV codes for EU procurement. Need the company's codes? Scoutee's free signed-in AI finder uses its knowledge base at https://scoutee.org/en/find-my-cpv. Returns a page of notices, the total number of matches, a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look) and what the caller's hourly quota has left. Open notices only and newest first unless asked otherwise; notices published on several portals appear once, the other portals listed in `also_on`. Each search consumes one quota unit.",
+        "description": "Search public tenders across Europe and North America by keyword, country, budget, or optional CPV codes for EU procurement. Use find_cpv_codes to discover suitable official codes with the user, available on every plan with a separate daily limit. Returns a page of notices, the total number of matches, a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look) and what the caller's hourly quota has left. Open notices only and newest first unless asked otherwise; notices published on several portals appear once, the other portals listed in `also_on`. Each search consumes one quota unit.",
         "inputSchema": {
           "properties": {
             "q": {
@@ -2651,6 +2863,186 @@
             "closed_at"
           ],
           "title": "TenderOut",
+          "type": "object"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "find_cpv_codes",
+        "title": "Find CPV codes for your activity",
+        "description": "Find official CPV catalogue candidates for the user's actual products, works or services. Available without an account on public MCP and on every plan through workspace MCP. Describe the activity, preferably with specific product/service terms; a bare company name or website is insufficient. Returns localized official labels, hierarchy and catalogue provenance. Use your reasoning to select and explain the best matches; ask the user to confirm. No company web research or paid Scoutee AI call is triggered. Up to 30 candidates per call. Separate daily budget: 20 calls per anonymous IP, 50 per authenticated account across credentials and workspaces. Read quota.remaining and quota.resets_at; do not retry after exhaustion.",
+        "inputSchema": {
+          "properties": {
+            "activity": {
+              "description": "The actual products, works or services supplied. Use specific activity terms; never send private company data.",
+              "maxLength": 2000,
+              "minLength": 3,
+              "title": "Activity",
+              "type": "string"
+            },
+            "locale": {
+              "default": "en",
+              "description": "Official label language, such as en, fr or de; unavailable labels fall back to English.",
+              "pattern": "^[a-z]{2}$",
+              "title": "Locale",
+              "type": "string"
+            }
+          },
+          "required": [
+            "activity"
+          ],
+          "title": "find_cpv_codes_toolArguments",
+          "type": "object"
+        },
+        "outputSchema": {
+          "$defs": {
+            "CatalogueMetadata": {
+              "properties": {
+                "id": {
+                  "title": "Id",
+                  "type": "integer"
+                },
+                "version": {
+                  "description": "Scoutee's versioned catalogue snapshot identifier.",
+                  "title": "Version",
+                  "type": "string"
+                },
+                "nomenclature_version": {
+                  "description": "Official nomenclature edition, such as CPV 2008.",
+                  "title": "Nomenclature Version",
+                  "type": "string"
+                },
+                "sha256": {
+                  "description": "SHA-256 digest of the imported catalogue snapshot.",
+                  "title": "Sha256",
+                  "type": "string"
+                },
+                "source": {
+                  "description": "Official source URL recorded for this catalogue snapshot.",
+                  "title": "Source",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "version",
+                "nomenclature_version",
+                "sha256",
+                "source"
+              ],
+              "title": "CatalogueMetadata",
+              "type": "object"
+            },
+            "ClassificationCodeOut": {
+              "properties": {
+                "code": {
+                  "description": "Eight-digit CPV code accepted by the tender search's cpv parameter.",
+                  "title": "Code",
+                  "type": "string"
+                },
+                "display_code": {
+                  "description": "CPV code including its official check digit.",
+                  "title": "Display Code",
+                  "type": "string"
+                },
+                "label": {
+                  "description": "Catalogue label in the requested language, with English fallback.",
+                  "title": "Label",
+                  "type": "string"
+                },
+                "parent": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Parent code in the official hierarchy, or null at the root.",
+                  "title": "Parent"
+                },
+                "retired": {
+                  "description": "Whether this code has been retired in this catalogue snapshot.",
+                  "title": "Retired",
+                  "type": "boolean"
+                },
+                "replaced_by": {
+                  "description": "Replacement codes recorded in the catalogue, if any.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Replaced By",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "code",
+                "display_code",
+                "label",
+                "parent",
+                "retired",
+                "replaced_by"
+              ],
+              "title": "ClassificationCodeOut",
+              "type": "object"
+            },
+            "DailyQuota": {
+              "properties": {
+                "limit": {
+                  "title": "Limit",
+                  "type": "integer"
+                },
+                "remaining": {
+                  "title": "Remaining",
+                  "type": "integer"
+                },
+                "resets_at": {
+                  "format": "date-time",
+                  "title": "Resets At",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "limit",
+                "remaining",
+                "resets_at"
+              ],
+              "title": "DailyQuota",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "items": {
+              "items": {
+                "$ref": "#/$defs/ClassificationCodeOut"
+              },
+              "title": "Items",
+              "type": "array"
+            },
+            "catalogue": {
+              "$ref": "#/$defs/CatalogueMetadata"
+            },
+            "quota": {
+              "$ref": "#/$defs/DailyQuota"
+            },
+            "guidance": {
+              "default": "These are catalogue candidates, not a final classification. Compare their official labels with the user's actual products and services, explain the strongest matches, and ask the user to confirm before applying codes. Do not infer activities from a company name alone. If no candidate fits, ask for a more precise activity or reformulate using catalogue terminology. CPV applies to European procurement markets; do not substitute it for other classifications.",
+              "title": "Guidance",
+              "type": "string"
+            }
+          },
+          "required": [
+            "items",
+            "catalogue",
+            "quota"
+          ],
+          "title": "CpvDiscoveryResult",
           "type": "object"
         },
         "annotations": {

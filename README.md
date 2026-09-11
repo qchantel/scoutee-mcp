@@ -19,10 +19,9 @@ REST tender tools search and read notices and cannot subscribe or schedule email
 
 ## Your CPV codes, found for you
 
-Sign in to Scoutee for free: our AI combines your company's activity with our knowledge base to find
-relevant CPV codes automatically. Start with your company name or identifier, website, or activity
-description in the [free AI CPV finder](https://scoutee.org/en/find-my-cpv). Review the suggestions, then
-use them in workspace MCP or REST searches.
+Use `find_cpv_codes` with an activity description to help any user find suitable official CPV codes directly in their assistant, including anonymous public users and Free accounts. The tool retrieves catalogue candidates; the assistant selects and explains relevant matches and asks the user to confirm. No additional Scoutee AI call or web research is triggered. Each call returns up to 30 candidates. The separate daily allowance is 20 calls per anonymous IP or 50 per authenticated account across credentials and workspaces. Counters persist across servers and restarts and reset at midnight UTC. Read `quota.remaining` and `quota.resets_at`; stop on `cpv_quota_exceeded`. Public callers behind the same provider egress IP share that anonymous allowance. Use verified OAuth access for a personal allowance. Review suggestions with the user before selecting search filters.
+
+For company website or identifier research, the [signed-in AI finder](https://scoutee.org/en/find-my-cpv) remains available on Scoutee.
 
 Use `search_tenders` with `cpv: ["90911200-8"]`, or `GET /api/tenders?cpv=90911200-8&country=France`.
 Selected codes include official descendants; CPV and keywords combine with OR, while country and budget

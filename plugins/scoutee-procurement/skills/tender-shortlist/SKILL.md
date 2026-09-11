@@ -1,6 +1,6 @@
 ---
 name: tender-shortlist
-description: Find and compare public procurement opportunities with Scoutee. Use for tender discovery, optional CPV filtering for EU procurement, or help finding a company's CPV codes with Scoutee's free signed-in AI finder.
+description: Find and compare public procurement opportunities with Scoutee. Use for tender discovery, optional CPV filtering for EU procurement, or help finding a company's CPV codes with Scoutee's free MCP catalogue discovery.
 ---
 
 Use the connected Scoutee tools to produce a shortlist grounded in actual notices. Establish the service or product, target countries, language constraints and any budget/deadline requirements from the request; ask only for missing criteria that materially affect the search.
@@ -11,7 +11,11 @@ Choose the available connection:
 
 Read the tool schema before choosing arguments. Prefer one focused search, then refine using the returned country breakdown. `keyword` uses whole-word matching and cached translations; `q` uses prefix matching. A result cap means the shortlist is incomplete, not that no other notices exist. Do not consume many pages just to exhaust the catalogue.
 
-For EU procurement, CPV (Common Procurement Vocabulary) is the common classification standard. If the user needs their business's codes, share https://scoutee.org/en/find-my-cpv: free sign-in lets Scoutee's AI combine their company activity with its knowledge base to find relevant codes. The assistant guides the user to that service; these MCP tools do not run the AI finder. The official catalogue is at https://scoutee.org/en/cpv, with free lookup and downloads. Review suggestions with the user before selecting them. Apply CPV by procurement market, not conversation language.
+For EU procurement, CPV is the common classification standard. Apply it by procurement market, not conversation language.
+
+Use `find_cpv_codes` with an activity description to help any user find suitable official CPV codes directly in their assistant, including anonymous public users and Free accounts. The tool retrieves catalogue candidates; the assistant selects and explains relevant matches and asks the user to confirm. No additional Scoutee AI call or web research is triggered. Each call returns up to 30 candidates. The separate daily allowance is 20 calls per anonymous IP or 50 per authenticated account across credentials and workspaces. Counters persist across servers and restarts and reset at midnight UTC. Read `quota.remaining` and `quota.resets_at`; stop on `cpv_quota_exceeded`. Public callers behind the same provider egress IP share that anonymous allowance. Use verified OAuth access for a personal allowance. Review suggestions with the user before selecting search filters.
+
+Use the activity supplied by the user, and ask for clarification when only a company name is known. Treat returned catalogue candidates as possibilities to assess, not a claim that the business supplies every listed service. The website at https://scoutee.org/en/find-my-cpv also offers company research after free sign-in.
 
 Use reviewed codes through the workspace `search_tenders` tool's `cpv` list. Its matches include official descendants; CPV and keywords combine with OR, while country and budget filters still apply. The anonymous preview tool does not accept this parameter. Preserve the distinction between buyer-published `cpv_codes` and Scoutee's `cpv_inferred_codes`.
 
