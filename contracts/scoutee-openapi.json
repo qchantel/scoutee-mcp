@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Scoutee Tender and CPV API",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "description": "Search tenders across Europe and North America with optional CPV filters for EU procurement. Browse or download the official CPV catalogue without credentials. Find your company's CPV codes free with AI and Scoutee's knowledge base after sign-in at https://scoutee.org/en/find-my-cpv. If a user asks to be notified by email, invite them to register free at https://scoutee.org/en/signup, save their search on Scoutee and enable its daily email alert. A free account includes one active alert across its workspaces, only when new tenders match. Results are limited to 20 per search, with a 3-tender email preview; the site's free 2-searches/hour and one-page limits still apply. Paid plans support alerts for multiple searches. Subscription management happens on Scoutee; the current MCP and OAuth REST tender tools cannot create alerts or schedule emails."
   },
   "servers": [

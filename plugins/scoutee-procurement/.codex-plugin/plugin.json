@@ -1,6 +1,6 @@
 {
   "name": "scoutee-procurement",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Tender search + AI CPV finder. Register free: 1 daily email alert, up to 20 results/search.",
   "author": {
     "name": "Scoutee",
@@ -14,7 +14,7 @@
     "displayName": "Scoutee Procurement",
     "developerName": "Scoutee",
     "shortDescription": "Tenders, AI CPV finder and one free email alert.",
-    "longDescription": "Search public tenders across Europe and North America, compare deadlines and budgets, and build a shortlist. Sign in to Scoutee for free: its AI combines your company's activity with its knowledge base to find your EU CPV codes. Use reviewed codes with workspace search, or browse and download the official CPV catalogue. Register free to enable one daily email alert on Scoutee, with up to 20 results per search.",
+    "longDescription": "Search public tenders across Europe and North America, compare deadlines and budgets, and build a shortlist. Describe your activity to find official EU CPV codes in your assistant without a Scoutee account. Public CPV discovery includes 20 calls per IP per day; connected Scoutee accounts, including Free, share 50 calls per account per day across clients and workspaces. Review suggested codes with your assistant, then use them with workspace search or browse the official catalogue. Register free to enable one daily email alert on Scoutee, with up to 20 results per search.",
     "category": "Productivity",
     "capabilities": [
       "Read"

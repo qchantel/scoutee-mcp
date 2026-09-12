@@ -1,6 +1,7 @@
 {
-  "version": "1.4.0",
+  "version": "1.4.1",
   "protocol_version": "2025-11-25",
+  "modern_protocol_version": "2026-07-28",
   "endpoints": {
     "public-mcp": "https://scoutee.org/api/mcp/public",
     "workspace-mcp": "https://scoutee.org/api/mcp",
@@ -54,7 +55,8 @@
       ],
       "tests": [
         "tests/functional/test_mcp_public.py",
-        "tests/functional/test_mcp_cpv.py"
+        "tests/functional/test_mcp_cpv.py",
+        "tests/functional/test_mcp_protocol.py"
       ]
     },
     "workspace-mcp": {
@@ -81,7 +83,8 @@
         "tests/functional/test_mcp.py",
         "tests/functional/test_oauth.py",
         "tests/functional/test_errors_and_keys.py",
-        "tests/functional/test_mcp_cpv.py"
+        "tests/functional/test_mcp_cpv.py",
+        "tests/functional/test_mcp_protocol.py"
       ]
     },
     "rest": {
