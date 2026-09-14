@@ -196,6 +196,7 @@
         },
         "oauth": true,
         "api_keys": false,
+        "award_history": false,
         "prices": {
           "eur": {
             "month": 0,
@@ -229,6 +230,7 @@
         },
         "oauth": true,
         "api_keys": true,
+        "award_history": false,
         "prices": {
           "eur": {
             "month": 4900,
@@ -248,7 +250,7 @@
         "label": "Team",
         "purchasable": true,
         "inherits": null,
-        "included_users": 5,
+        "included_users": 10,
         "analyses_per_month": null,
         "quota": {
           "per_hour": 300,
@@ -265,6 +267,7 @@
         },
         "oauth": true,
         "api_keys": true,
+        "award_history": true,
         "prices": {
           "eur": {
             "month": 14900,
@@ -301,6 +304,7 @@
         },
         "oauth": true,
         "api_keys": true,
+        "award_history": false,
         "prices": {
           "eur": {
             "month": 1999,
@@ -316,7 +320,7 @@
         "label": "Beta",
         "purchasable": false,
         "inherits": "team",
-        "included_users": 5,
+        "included_users": 10,
         "analyses_per_month": null,
         "quota": {
           "per_hour": 300,
@@ -333,6 +337,7 @@
         },
         "oauth": true,
         "api_keys": true,
+        "award_history": true,
         "prices": {
           "eur": null,
           "usd": null
@@ -415,6 +420,79 @@
     "analysis_pack": {
       "count": 10,
       "amount_cents": 1000
+    },
+    "default_tier": "a",
+    "tiers": {
+      "a": {
+        "countries": [],
+        "plans": {
+          "pro": {
+            "month": 4900,
+            "year": 49000
+          },
+          "team": {
+            "month": 14900,
+            "year": 149000
+          }
+        },
+        "seat": {
+          "month": 999,
+          "year": 9990
+        },
+        "analysis_pack_cents": 1000
+      },
+      "b": {
+        "countries": [
+          "CZ",
+          "EE",
+          "ES",
+          "HR",
+          "LT",
+          "PL",
+          "PT",
+          "SI",
+          "SK"
+        ],
+        "plans": {
+          "pro": {
+            "month": 3400,
+            "year": 34000
+          },
+          "team": {
+            "month": 9900,
+            "year": 99000
+          }
+        },
+        "seat": {
+          "month": 699,
+          "year": 6990
+        },
+        "analysis_pack_cents": 700
+      },
+      "c": {
+        "countries": [
+          "BG",
+          "GR",
+          "HU",
+          "LV",
+          "RO"
+        ],
+        "plans": {
+          "pro": {
+            "month": 1999,
+            "year": 19990
+          },
+          "team": {
+            "month": 5999,
+            "year": 59990
+          }
+        },
+        "seat": {
+          "month": 499,
+          "year": 4990
+        },
+        "analysis_pack_cents": 500
+      }
     }
   },
   "tools": {
@@ -1428,6 +1506,41 @@
               "title": "AwardCriterion",
               "type": "object"
             },
+            "BuyerLink": {
+              "properties": {
+                "id": {
+                  "title": "Id",
+                  "type": "integer"
+                },
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "role": {
+                  "title": "Role",
+                  "type": "string"
+                },
+                "favicon_url": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Favicon Url"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "role"
+              ],
+              "title": "BuyerLink",
+              "type": "object"
+            },
             "CriterionPart": {
               "properties": {
                 "name": {
@@ -1825,6 +1938,13 @@
                     }
                   ],
                   "title": "Buyer"
+                },
+                "buyers": {
+                  "items": {
+                    "$ref": "#/$defs/BuyerLink"
+                  },
+                  "title": "Buyers",
+                  "type": "array"
                 },
                 "description": {
                   "anyOf": [
@@ -2274,6 +2394,41 @@
               "title": "AwardCriterion",
               "type": "object"
             },
+            "BuyerLink": {
+              "properties": {
+                "id": {
+                  "title": "Id",
+                  "type": "integer"
+                },
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "role": {
+                  "title": "Role",
+                  "type": "string"
+                },
+                "favicon_url": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Favicon Url"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "role"
+              ],
+              "title": "BuyerLink",
+              "type": "object"
+            },
             "CriterionPart": {
               "properties": {
                 "name": {
@@ -2671,6 +2826,13 @@
                 }
               ],
               "title": "Buyer"
+            },
+            "buyers": {
+              "items": {
+                "$ref": "#/$defs/BuyerLink"
+              },
+              "title": "Buyers",
+              "type": "array"
             },
             "description": {
               "anyOf": [
