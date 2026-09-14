@@ -702,6 +702,13 @@
             ],
             "title": "Buyer"
           },
+          "buyers": {
+            "items": {
+              "$ref": "#/components/schemas/BuyerLink"
+            },
+            "type": "array",
+            "title": "Buyers"
+          },
           "description": {
             "anyOf": [
               {
@@ -1360,6 +1367,40 @@
         ],
         "title": "AlsoOn",
         "description": "Another portal that published the same notice (its copy is hidden from search)."
+      },
+      "BuyerLink": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "favicon_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Favicon Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "role"
+        ],
+        "title": "BuyerLink"
       },
       "TenderPage": {
         "properties": {
