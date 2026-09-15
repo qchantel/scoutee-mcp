@@ -70,7 +70,12 @@ def changed_paths(local: object, deployed: object, path: str = "") -> list[str]:
 
 def fetch_contract(url: str) -> object:
     request = Request(
-        url, headers={"Accept": "application/json", "Cache-Control": "no-cache"}
+        url,
+        headers={
+            "Accept": "application/json",
+            "Cache-Control": "no-cache",
+            "User-Agent": "ScouteeContractChecker/1.0 (+https://github.com/qchantel/scoutee-mcp)",
+        },
     )
     with urlopen(request, timeout=20) as response:
         body = response.read(MAX_RESPONSE_BYTES + 1)
@@ -103,9 +108,10 @@ def check(root: Path, *, live: bool = False, fetch=fetch_contract) -> dict:
                 status="drift" if differences else "passed", changed_paths=differences
             )
         except (OSError, ValueError, TypeError, URLError) as exc:
-            if isinstance(exc, HTTPError):
-                exc.close()
             item.update(status="unavailable", error=type(exc).__name__)
+            if isinstance(exc, HTTPError):
+                item["http_status"] = exc.code
+                exc.close()
         report["remote"].append(item)
     statuses = {item["status"] for item in report["remote"]}
     if "drift" in statuses:

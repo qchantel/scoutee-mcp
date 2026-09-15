@@ -102,6 +102,7 @@ class ContractTests(unittest.TestCase):
         result = check(self.root, live=True, fetch=unavailable)
         self.assertEqual(result["status"], "unavailable")
         self.assertEqual(len(result["remote"]), 2)
+        self.assertEqual(result["remote"][0]["http_status"], 503)
 
     def test_failed_second_fetch_cannot_hide_confirmed_drift(self):
         def mixed(url):
