@@ -434,6 +434,26 @@
             }
           },
           {
+            "name": "near",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 3
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Near"
+            }
+          },
+          {
             "name": "sort",
             "in": "query",
             "required": false,
@@ -441,7 +461,8 @@
               "enum": [
                 "newest",
                 "oldest",
-                "deadline"
+                "deadline",
+                "nearest"
               ],
               "type": "string",
               "default": "newest",
@@ -877,6 +898,13 @@
                 "type": "null"
               }
             ]
+          },
+          "document_links": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentLinkOut"
+            },
+            "type": "array",
+            "title": "Document Links"
           }
         },
         "type": "object",
@@ -901,6 +929,42 @@
           "closed_at"
         ],
         "title": "TenderOut"
+      },
+      "DocumentLinkOut": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "seen_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seen At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "url",
+          "kind"
+        ],
+        "title": "DocumentLinkOut",
+        "description": "One document listed on the buyer's platform, for the user to fetch there."
       },
       "ProcurementFacts": {
         "properties": {

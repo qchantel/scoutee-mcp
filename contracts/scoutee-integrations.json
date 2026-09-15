@@ -362,8 +362,8 @@
       "visitor_search": {
         "per_hour": 10,
         "burst_per_minute": 5,
-        "max_page_size": 10,
-        "max_page": 1
+        "max_page_size": 20,
+        "max_page": 100000
       },
       "public_mcp": {
         "per_hour": 1200,
@@ -1606,6 +1606,43 @@
               "title": "CriterionPart",
               "type": "object"
             },
+            "DocumentLinkOut": {
+              "description": "One document listed on the buyer's platform, for the user to fetch there.",
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "url": {
+                  "title": "Url",
+                  "type": "string"
+                },
+                "kind": {
+                  "title": "Kind",
+                  "type": "string"
+                },
+                "seen_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Seen At"
+                }
+              },
+              "required": [
+                "name",
+                "url",
+                "kind"
+              ],
+              "title": "DocumentLinkOut",
+              "type": "object"
+            },
             "ProcurementFacts": {
               "properties": {
                 "procedure": {
@@ -2117,6 +2154,13 @@
                     }
                   ],
                   "default": null
+                },
+                "document_links": {
+                  "items": {
+                    "$ref": "#/$defs/DocumentLinkOut"
+                  },
+                  "title": "Document Links",
+                  "type": "array"
                 }
               },
               "required": [
@@ -2492,6 +2536,43 @@
                 "name"
               ],
               "title": "CriterionPart",
+              "type": "object"
+            },
+            "DocumentLinkOut": {
+              "description": "One document listed on the buyer's platform, for the user to fetch there.",
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "url": {
+                  "title": "Url",
+                  "type": "string"
+                },
+                "kind": {
+                  "title": "Kind",
+                  "type": "string"
+                },
+                "seen_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Seen At"
+                }
+              },
+              "required": [
+                "name",
+                "url",
+                "kind"
+              ],
+              "title": "DocumentLinkOut",
               "type": "object"
             },
             "ProcurementFacts": {
@@ -3005,6 +3086,13 @@
                 }
               ],
               "default": null
+            },
+            "document_links": {
+              "items": {
+                "$ref": "#/$defs/DocumentLinkOut"
+              },
+              "title": "Document Links",
+              "type": "array"
             }
           },
           "required": [

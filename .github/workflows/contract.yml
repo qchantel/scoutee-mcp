@@ -1,0 +1,34 @@
+name: Connector contract
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '41 5 * * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: connector-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Regression tests
+        run: python3 -m unittest discover -s tests -v
+      - name: Verify every exported source hash
+        run: python3 scripts/check_contract.py
+      # A provider update can deploy before its export PR. Keep PR checks deterministic;
+      # check deployed freshness daily and after publication, using only public schema GETs.
+      - name: Compare with the deployed product contract
+        if: github.event_name != 'pull_request'
+        run: python3 scripts/check_contract.py --live
