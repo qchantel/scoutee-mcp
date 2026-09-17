@@ -3,7 +3,7 @@
   "name": "org.scoutee/scoutee",
   "title": "Scoutee",
   "version": "1.4.1",
-  "description": "Tender search + AI CPV finder. Register free: 1 daily email alert, up to 20 results/search.",
+  "description": "Tender search + AI CPV finder. Register free: 1 daily email alert(s), up to 20 results/search.",
   "websiteUrl": "https://scoutee.org",
   "repository": {
     "url": "https://github.com/qchantel/scoutee-mcp",

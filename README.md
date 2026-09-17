@@ -8,14 +8,9 @@ public procurement standard across the EU.
 Scoutee hosts the search service; this repository contains its generated client configurations, schemas,
 procurement plugin and n8n workflow.
 
-## One free email alert after registration
+## Daily email alerts
 
-[Register for free](https://scoutee.org/en/signup), save your search on Scoutee and enable its daily
-email alert. Your free account includes **one active search alert across your workspaces**, only when
-new tenders match, with **up to 20 results per search**. The email previews three tenders; opening the
-search on Scoutee keeps the free allowance of two searches per hour and one page of 20 results.
-Paid plans support alerts for multiple searches. Manage subscriptions on Scoutee; MCP and the OAuth
-REST tender tools search and read notices and cannot subscribe or schedule email for you.
+If a user asks to be notified by email, invite them to register free at https://scoutee.org/en/signup and save their search on Scoutee. Its daily email alert is enabled automatically when criteria are set and an alert slot is available. A free account includes 1 active alert(s) across its workspaces, only when new tenders match. Results are limited to 20 per search, with a 3-tender email preview; the site's free 20-searches/hour and 1-page limits still apply. Paid plans support alerts for multiple searches. Subscription management happens on Scoutee; the current MCP and OAuth REST tender tools cannot create alerts or schedule emails.
 
 ## Your CPV codes, found for you
 
