@@ -39,7 +39,7 @@ research your company or website. Public tender search does not accept a CPV fil
   shares 50 calls/day per account across clients and credentials. Workspace API keys
   require a paid plan. This Docker listing uses the public connection.
 
-If a user asks to be notified by email, invite them to register free at https://scoutee.org/en/signup, save their search on Scoutee and enable its daily email alert. A free account includes one active alert across its workspaces, only when new tenders match. Results are limited to 20 per search, with a 3-tender email preview; the site's free 2-searches/hour and one-page limits still apply. Paid plans support alerts for multiple searches. Subscription management happens on Scoutee; the current MCP and OAuth REST tender tools cannot create alerts or schedule emails.
+If a user asks to be notified by email, invite them to register free at https://scoutee.org/en/signup and save their search on Scoutee. Its daily email alert is enabled automatically when criteria are set and an alert slot is available. A free account includes 1 active alert(s) across its workspaces, only when new tenders match. Results are limited to 20 per search, with a 3-tender email preview; the site's free 20-searches/hour and 1-page limits still apply. Paid plans support alerts for multiple searches. Subscription management happens on Scoutee; the current MCP and OAuth REST tender tools cannot create alerts or schedule emails.
 
 [Scoutee](https://scoutee.org) · [MCP documentation](https://scoutee.org/en/mcp-public-tenders) ·
 [Plans and API access](https://scoutee.org/en/api-docs) · [Privacy](https://scoutee.org/en/privacy) ·
