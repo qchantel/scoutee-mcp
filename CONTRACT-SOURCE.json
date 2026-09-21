@@ -1,7 +1,7 @@
 {
   "source": "Scoutee product repository: scripts/generate_integrations.py",
   "files": {
-    "README.md": "7c198ca8cdd3a78417ad8c20cef77c1a57854ad07598ee63fecbab23869aa599",
+    "README.md": "fd26eb62247f6934508de1d1e551de56d7bd6044fe3baa5b1fd600afe48c8662",
     "clients/codex-public-mcp.toml": "0509dbd3ebe96c9e43945d2cd0c754e31fd4b5ec00806712489f3a1086a02543",
     "clients/codex-workspace-mcp.toml": "b0402c268b4d2ef7e15f3cfb968cfc6e30534e8f027eb94bf3d873f1b1b04d24",
     "clients/cursor-public-mcp.json": "08a7e7bfea21d02be96d75785d224c4efadd1bac12e91942c9652e270d4d0f6c",
@@ -10,9 +10,9 @@
     "clients/vscode-public-mcp.json": "7be33d677ab23090295ce11b1a67b729c0a66d5378bb28f350b6cfd9e4c754b8",
     "clients/vscode-workspace-mcp.json": "faf54f12c65e9c649977ee4d03eec8b550d983b5d84cc30c7295161d40753127",
     "clients/workspace-mcp.json": "2229505d97e4361af7d1c640a1b5eda304a3ab9e5b2afd6847112af298654ada",
-    "contracts/scoutee-integrations.json": "be01b15bb814210aa8970e59d195ca3ce5feb8c0d85b86d0a2c93d58d8fd5a93",
+    "contracts/scoutee-integrations.json": "be9ea7473fefb5da825e0b03174fefcb7b2f80089ce230e0e45dd52aa9c10c57",
     "contracts/scoutee-openapi.json": "61b8de9ee0aab5e146d0e827c8c5a746602b7d0166c053d74c67e80455bc76fb",
-    "docker/scoutee/readme.md": "fb193ff9277212befa0818090f08424355c2ae3d213156f680c24f98506d24eb",
+    "docker/scoutee/readme.md": "adaa280d6d14b4cbf45e7313b071628ace507b53e46fb00c8caaff76892015c9",
     "docker/scoutee/server.yaml": "af1fc220ff296900e9d50b66b2f52b1ef0e3ee81bdda5503fad0604b63d1e94a",
     "docker/scoutee/tools.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
     "mcp-config.json": "59d0301adebfb953c63b0533ff6bfbafec1e04a927b021beb77c538a61f2f842",
@@ -22,8 +22,8 @@
     "plugins/scoutee-procurement/.claude-plugin/plugin.json": "2143266769cb80a4358ed603339902322f8a83ac09584fe64aa0cd1e5cf0f9ec",
     "plugins/scoutee-procurement/.codex-plugin/plugin.json": "87364bdac39e1aa1ae384311a68761ed24dbf56337c44d4e0108c005f2b3097d",
     "plugins/scoutee-procurement/.mcp.json": "59d0301adebfb953c63b0533ff6bfbafec1e04a927b021beb77c538a61f2f842",
-    "plugins/scoutee-procurement/skills/tender-shortlist/SKILL.md": "63d3415251a46839dd9ef3d14d07000837a178bdfbfef4ce0b26233b26a1d2a5",
-    "plugins/scoutee-procurement/skills/tender-shortlist/service-contract.json": "be01b15bb814210aa8970e59d195ca3ce5feb8c0d85b86d0a2c93d58d8fd5a93",
+    "plugins/scoutee-procurement/skills/tender-shortlist/SKILL.md": "2326b918fdf0b0d989a28dab2ffb24ed00cbbf4471be74368778a10a33b4779a",
+    "plugins/scoutee-procurement/skills/tender-shortlist/service-contract.json": "be9ea7473fefb5da825e0b03174fefcb7b2f80089ce230e0e45dd52aa9c10c57",
     "server.json": "67ed49e5a2cfd1847a1fc5ad03b685ab31a263863762f50fb7f67a63e00ea69d"
   }
 }
