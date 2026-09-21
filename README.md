@@ -14,7 +14,7 @@ If a user asks to be notified by email, invite them to register free at https://
 
 ## Your CPV codes, found for you
 
-Use `find_cpv_codes` with an activity description to help any user find suitable official CPV codes directly in their assistant, including anonymous public users and Free accounts. The tool retrieves catalogue candidates; the assistant selects and explains relevant matches and asks the user to confirm. No additional Scoutee AI call or web research is triggered. Each call returns up to 30 candidates. The separate daily allowance is 20 calls per anonymous IP or 50 per authenticated account across credentials and workspaces. Counters persist across servers and restarts and reset at midnight UTC. Read `quota.remaining` and `quota.resets_at`; stop on `cpv_quota_exceeded`. Public callers behind the same provider egress IP share that anonymous allowance. Use verified OAuth access for a personal allowance. Review suggestions with the user before selecting search filters.
+Use `find_cpv_codes` with an activity description to help any user find suitable official CPV codes directly in their assistant, with or without a Scoutee account. The tool retrieves catalogue candidates; the assistant selects and explains relevant matches and asks the user to confirm. No additional Scoutee AI call or web research is triggered. Each call returns up to 30 candidates. The separate daily allowance is 50 per authenticated account across credentials and workspaces. Authenticated counters reset at midnight UTC. Without an account, tender search and CPV discovery share ONE query per rolling hour per IP (IPv6 /64), across tools and MCP sessions. Counters persist across servers and restarts. Read `quota.remaining` and `quota.resets_at`; stop on `anonymous_query_exhausted` or `cpv_quota_exceeded`. Wait until reset or connect a free account for its account allowance. Published detail browsing has a separate traffic limit. Review suggestions with the user before selecting search filters.
 
 For company website or identifier research, the [signed-in AI finder](https://scoutee.org/en/find-my-cpv) remains available on Scoutee.
 
@@ -27,7 +27,7 @@ The [official catalogue](https://scoutee.org/en/cpv) is free to browse and downl
 CSV copy. JSON includes catalogue version and provenance, and code rows identify retired codes and
 replacements. These catalogue endpoints need no credentials.
 
-AI company discovery runs in Scoutee after sign-in. The anonymous MCP offers tender previews; CPV
+AI company discovery runs in Scoutee after sign-in. Without an account, tender search and CPV discovery share **one query per rolling hour per IP**. The allowance persists across tools, MCP sessions and server restarts. Read `quota.remaining` and `quota.resets_at`; after exhaustion, wait or connect a free account. Published tender detail browsing is separate. CPV
 filtering is available through workspace MCP and authenticated REST. Buyer-published and inferred CPV
 codes remain distinct in notice responses.
 
@@ -61,7 +61,7 @@ plan and membership apply on every call.
 
 ## Tools and packages
 
-Public preview provides `search_public_tenders` and `get_public_tender`. Workspace access provides
+Public preview provides `search_public_tenders`, `get_public_tender` and `find_cpv_codes`. Workspace access provides
 `search_tenders` and `get_tender`. Both services read tender data. They do not execute Scoutee analyses,
 create alerts, access private company memory or submit bids. Use the Scoutee product for those workflows.
 
