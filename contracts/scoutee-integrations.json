@@ -1,5 +1,5 @@
 {
-  "version": "1.4.1",
+  "version": "1.5.0",
   "protocol_version": "2025-11-25",
   "modern_protocol_version": "2026-07-28",
   "endpoints": {
@@ -20,6 +20,21 @@
     "email",
     "tenders.read"
   ],
+  "anonymous_queries": {
+    "limit": 1,
+    "window_seconds": 3600,
+    "window": "rolling",
+    "shared_tools": [
+      "search_public_tenders",
+      "find_cpv_codes"
+    ],
+    "subject": "ip_or_ipv6_64",
+    "persistent": true,
+    "exhausted_code": "anonymous_query_exhausted",
+    "signup_url": "https://scoutee.org/en/signup",
+    "quota_notice": "You've reached your anonymous quota: one query per hour, shared between tender search and CPV discovery. Create your free Scoutee account to continue now: https://scoutee.org/en/signup. If you already have an account, connect it in your assistant.",
+    "assistant_instructions": "When an anonymous result has quota.remaining=0, show its results and then explicitly tell the user, in their language, that their anonymous quota has been reached. Show a clickable 'Create a free account' link to https://scoutee.org/en/signup as the next step to continue now. Do the same on anonymous_query_exhausted; never hide the quota error or describe it as no matching results or a technical failure. Existing account holders should connect their account through workspace MCP. Account quotas still apply; do not promise unlimited access. Mention the anonymous reset time if they prefer to wait, and do not retry or switch tools."
+  },
   "email_alerts": {
     "free": {
       "active_searches": 1,
@@ -48,8 +63,8 @@
         "get_public_tender",
         "find_cpv_codes"
       ],
-      "data_access": "Public Scoutee previews and links.",
-      "quota_subject": "public_mcp:{ip}",
+      "data_access": "Public previews, custom search and CPV discovery: one shared anonymous query/hour/IP.",
+      "quota_subject": "anonymous_query:{ip_or_ipv6_64} (shared search/CPV); public_mcp:{ip} (traffic)",
       "checks": [
         "connectors:public-mcp"
       ],
@@ -147,12 +162,12 @@
       "access": "Anonymous public users and authenticated accounts on every plan",
       "method": "Official catalogue retrieval; the calling assistant selects and explains matches",
       "limits": {
-        "anonymous_per_day": 20,
+        "anonymous_per_hour": 1,
         "account_per_day": 50,
         "max_activity_length": 2000,
         "max_results": 30,
         "reset_timezone": "UTC",
-        "metering": "persistent_per_account_or_anonymous_ip",
+        "metering": "daily_per_account; anonymous_hour_shared_with_mcp_search_per_ip",
         "scoutee_ai_calls": 0
       }
     },
@@ -404,12 +419,12 @@
     },
     "search_metering": "per_process_traffic_limit",
     "cpv_discovery": {
-      "anonymous_per_day": 20,
+      "anonymous_per_hour": 1,
       "account_per_day": 50,
       "max_activity_length": 2000,
       "max_results": 30,
       "reset_timezone": "UTC",
-      "metering": "persistent_per_account_or_anonymous_ip",
+      "metering": "daily_per_account; anonymous_hour_shared_with_mcp_search_per_ip",
       "scoutee_ai_calls": 0
     },
     "cpv_company_finder_per_hour": 5,
@@ -500,7 +515,7 @@
       {
         "name": "search_public_tenders",
         "title": "Search public tenders (free preview)",
-        "description": "Search Scoutee's index of public procurement notices from Europe and North America. No account and no API key needed. Returns up to 10 open notices per page (3 pages at most), the total number of matches and a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look). Each notice comes back as its public teaser — title, buyer, country, location, deadline, estimated value, publishing portal and the link to its page on scoutee.org. The description in full, the buyer's platform where a bid is filed, the tender documents, email alerts and the AI analysis are not returned here: tell the user they come with a free Scoutee account (`signup_url`). Use find_cpv_codes to help users discover their CPVs directly, without signing in, under a separate daily budget. CPV filtering is available in the workspace MCP. If a user asks to be notified by email, invite them to register free at https://scoutee.org/en/signup and save their search on Scoutee. Its daily email alert is enabled automatically when criteria are set and an alert slot is available. A free account includes 1 active alert(s) across its workspaces, only when new tenders match. Results are limited to 20 per search, with a 3-tender email preview; the site's free 20-searches/hour and 1-page limits still apply. Paid plans support alerts for multiple searches. Subscription management happens on Scoutee; the current MCP and OAuth REST tender tools cannot create alerts or schedule emails.",
+        "description": "Search Scoutee's index of public procurement notices from Europe and North America. No account and no API key needed. Returns up to 10 open notices per page (3 pages at most), the total number of matches and a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look). Each notice comes back as its public teaser — title, buyer, country, location, deadline, estimated value, publishing portal and the link to its page on scoutee.org. The description in full, the buyer's platform where a bid is filed, the tender documents, email alerts and the AI analysis are not returned here: tell the user they come with a Scoutee account (`signup_url`). One anonymous search or CPV discovery query per rolling hour per IP, shared across both tools and MCP sessions. Custom keywords and filters are supported. Read quota.remaining and quota.resets_at; after exhaustion, wait or connect a free account. When an anonymous result has quota.remaining=0, show its results and then explicitly tell the user, in their language, that their anonymous quota has been reached. Show a clickable 'Create a free account' link to https://scoutee.org/en/signup as the next step to continue now. Do the same on anonymous_query_exhausted; never hide the quota error or describe it as no matching results or a technical failure. Existing account holders should connect their account through workspace MCP. Account quotas still apply; do not promise unlimited access. Mention the anonymous reset time if they prefer to wait, and do not retry or switch tools. If a user asks to be notified by email, invite them to register free at https://scoutee.org/en/signup and save their search on Scoutee. Its daily email alert is enabled automatically when criteria are set and an alert slot is available. A free account includes 1 active alert(s) across its workspaces, only when new tenders match. Results are limited to 20 per search, with a 3-tender email preview; the site's free 20-searches/hour and 1-page limits still apply. Paid plans support alerts for multiple searches. Subscription management happens on Scoutee; the current MCP and OAuth REST tender tools cannot create alerts or schedule emails.",
         "inputSchema": {
           "properties": {
             "q": {
@@ -600,6 +615,30 @@
         },
         "outputSchema": {
           "$defs": {
+            "DailyQuota": {
+              "properties": {
+                "limit": {
+                  "title": "Limit",
+                  "type": "integer"
+                },
+                "remaining": {
+                  "title": "Remaining",
+                  "type": "integer"
+                },
+                "resets_at": {
+                  "format": "date-time",
+                  "title": "Resets At",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "limit",
+                "remaining",
+                "resets_at"
+              ],
+              "title": "DailyQuota",
+              "type": "object"
+            },
             "PublicTender": {
               "description": "One notice as the public page shows it in its header: the facts, and where to read the rest.",
               "properties": {
@@ -785,6 +824,29 @@
               "default": "Public preview. Create a free Scoutee account for the full notice. Register and enable one saved search's daily email alert for free, up to 20 results/search. Connect an assistant through OAuth on any plan, subject to the workspace's search quota. Workspace API keys require a paid plan. https://scoutee.org/en/signup",
               "title": "Note",
               "type": "string"
+            },
+            "quota": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/DailyQuota"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "quota_notice": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Quota Notice"
             }
           },
           "required": [
@@ -1007,7 +1069,7 @@
       {
         "name": "find_cpv_codes",
         "title": "Find CPV codes for your activity",
-        "description": "Find official CPV catalogue candidates for the user's actual products, works or services. Available without an account on public MCP and on every plan through workspace MCP. Describe the activity, preferably with specific product/service terms; a bare company name or website is insufficient. Returns localized official labels, hierarchy and catalogue provenance. Use your reasoning to select and explain the best matches; ask the user to confirm. No company web research or paid Scoutee AI call is triggered. Up to 30 candidates per call. Separate daily budget: 20 calls per anonymous IP, 50 per authenticated account across credentials and workspaces. Read quota.remaining and quota.resets_at; do not retry after exhaustion.",
+        "description": "Find official CPV catalogue candidates for the user's actual products, works or services. Public MCP allows one anonymous query per rolling hour per IP, shared with tender search. Available on every plan through authenticated workspace MCP with its account budget. Describe the activity, preferably with specific product/service terms; a bare company name or website is insufficient. Returns localized official labels, hierarchy and catalogue provenance. Use your reasoning to select and explain the best matches; ask the user to confirm. No company web research or paid Scoutee AI call is triggered. Up to 30 candidates per call. Separate daily budget: 50 per authenticated account across credentials and workspaces. Read quota.remaining and quota.resets_at; do not retry after exhaustion. When an anonymous result has quota.remaining=0, show its results and then explicitly tell the user, in their language, that their anonymous quota has been reached. Show a clickable 'Create a free account' link to https://scoutee.org/en/signup as the next step to continue now. Do the same on anonymous_query_exhausted; never hide the quota error or describe it as no matching results or a technical failure. Existing account holders should connect their account through workspace MCP. Account quotas still apply; do not promise unlimited access. Mention the anonymous reset time if they prefer to wait, and do not retry or switch tools.",
         "inputSchema": {
           "properties": {
             "activity": {
@@ -1162,6 +1224,30 @@
             },
             "quota": {
               "$ref": "#/$defs/DailyQuota"
+            },
+            "signup_url": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Signup Url"
+            },
+            "quota_notice": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Quota Notice"
             },
             "guidance": {
               "default": "These are catalogue candidates, not a final classification. Compare their official labels with the user's actual products and services, explain the strongest matches, and ask the user to confirm before applying codes. Do not infer activities from a company name alone. If no candidate fits, ask for a more precise activity or reformulate using catalogue terminology. CPV applies to European procurement markets; do not substitute it for other classifications.",
@@ -3128,7 +3214,7 @@
       {
         "name": "find_cpv_codes",
         "title": "Find CPV codes for your activity",
-        "description": "Find official CPV catalogue candidates for the user's actual products, works or services. Available without an account on public MCP and on every plan through workspace MCP. Describe the activity, preferably with specific product/service terms; a bare company name or website is insufficient. Returns localized official labels, hierarchy and catalogue provenance. Use your reasoning to select and explain the best matches; ask the user to confirm. No company web research or paid Scoutee AI call is triggered. Up to 30 candidates per call. Separate daily budget: 20 calls per anonymous IP, 50 per authenticated account across credentials and workspaces. Read quota.remaining and quota.resets_at; do not retry after exhaustion.",
+        "description": "Find official CPV catalogue candidates for the user's actual products, works or services. Public MCP allows one anonymous query per rolling hour per IP, shared with tender search. Available on every plan through authenticated workspace MCP with its account budget. Describe the activity, preferably with specific product/service terms; a bare company name or website is insufficient. Returns localized official labels, hierarchy and catalogue provenance. Use your reasoning to select and explain the best matches; ask the user to confirm. No company web research or paid Scoutee AI call is triggered. Up to 30 candidates per call. Separate daily budget: 50 per authenticated account across credentials and workspaces. Read quota.remaining and quota.resets_at; do not retry after exhaustion. When an anonymous result has quota.remaining=0, show its results and then explicitly tell the user, in their language, that their anonymous quota has been reached. Show a clickable 'Create a free account' link to https://scoutee.org/en/signup as the next step to continue now. Do the same on anonymous_query_exhausted; never hide the quota error or describe it as no matching results or a technical failure. Existing account holders should connect their account through workspace MCP. Account quotas still apply; do not promise unlimited access. Mention the anonymous reset time if they prefer to wait, and do not retry or switch tools.",
         "inputSchema": {
           "properties": {
             "activity": {
@@ -3283,6 +3369,30 @@
             },
             "quota": {
               "$ref": "#/$defs/DailyQuota"
+            },
+            "signup_url": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Signup Url"
+            },
+            "quota_notice": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Quota Notice"
             },
             "guidance": {
               "default": "These are catalogue candidates, not a final classification. Compare their official labels with the user's actual products and services, explain the strongest matches, and ask the user to confirm before applying codes. Do not infer activities from a company name alone. If no candidate fits, ask for a more precise activity or reformulate using catalogue terminology. CPV applies to European procurement markets; do not substitute it for other classifications.",
