@@ -454,6 +454,24 @@
             }
           },
           {
+            "name": "radius_km",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2000,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Radius Km"
+            }
+          },
+          {
             "name": "sort",
             "in": "query",
             "required": false,

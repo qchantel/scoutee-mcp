@@ -11,7 +11,7 @@
     "clients/vscode-workspace-mcp.json": "faf54f12c65e9c649977ee4d03eec8b550d983b5d84cc30c7295161d40753127",
     "clients/workspace-mcp.json": "2229505d97e4361af7d1c640a1b5eda304a3ab9e5b2afd6847112af298654ada",
     "contracts/scoutee-integrations.json": "ad70eb218f800a5a8889fc7a1116a12563b353d30fef0f09db02ebcca25161e1",
-    "contracts/scoutee-openapi.json": "5a4f53238d4db4f90ebbfbe713aeb3d2daef07ef166837b9d0a78a20a5c857f5",
+    "contracts/scoutee-openapi.json": "409ed31e6c76444d4928a5e6be8fb7e256f807ef400060c1b82928697af8c5cc",
     "docker/scoutee/readme.md": "e98194e572eda4ac440fb7290d96a01b1e8348321f2b83a18276abff276ebfa7",
     "docker/scoutee/server.yaml": "af1fc220ff296900e9d50b66b2f52b1ef0e3ee81bdda5503fad0604b63d1e94a",
     "docker/scoutee/tools.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
