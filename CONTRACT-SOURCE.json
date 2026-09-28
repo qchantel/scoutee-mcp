@@ -1,6 +1,8 @@
 {
   "source": "Scoutee product repository: scripts/generate_integrations.py",
   "files": {
+    ".claude-plugin/plugin.json": "2bc900d2a66623c330faa923a911862a9050daebd941083d6b475e18766cab33",
+    ".mcp.json": "59d0301adebfb953c63b0533ff6bfbafec1e04a927b021beb77c538a61f2f842",
     "README.md": "db312680bb38ae92d0c7bd2ccbe5dd17741d8eff76e2c7d6fed258b2720e4689",
     "clients/codex-public-mcp.toml": "0509dbd3ebe96c9e43945d2cd0c754e31fd4b5ec00806712489f3a1086a02543",
     "clients/codex-workspace-mcp.toml": "b0402c268b4d2ef7e15f3cfb968cfc6e30534e8f027eb94bf3d873f1b1b04d24",
@@ -24,6 +26,8 @@
     "plugins/scoutee-procurement/.mcp.json": "59d0301adebfb953c63b0533ff6bfbafec1e04a927b021beb77c538a61f2f842",
     "plugins/scoutee-procurement/skills/tender-shortlist/SKILL.md": "eaff827a5efe9105a9694fcd99775175041787500d1a9f7bdf8fe4f6471b0e45",
     "plugins/scoutee-procurement/skills/tender-shortlist/service-contract.json": "ad70eb218f800a5a8889fc7a1116a12563b353d30fef0f09db02ebcca25161e1",
-    "server.json": "5d7864bc34bd47a2480584667e858c41b4f7da9715cbbd7fb6a14497cacfc72a"
+    "server.json": "5d7864bc34bd47a2480584667e858c41b4f7da9715cbbd7fb6a14497cacfc72a",
+    "skills/tender-shortlist/SKILL.md": "eaff827a5efe9105a9694fcd99775175041787500d1a9f7bdf8fe4f6471b0e45",
+    "skills/tender-shortlist/service-contract.json": "ad70eb218f800a5a8889fc7a1116a12563b353d30fef0f09db02ebcca25161e1"
   }
 }

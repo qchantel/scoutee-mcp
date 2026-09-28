@@ -1,0 +1,13 @@
+{
+  "name": "scoutee-procurement",
+  "version": "1.6.0",
+  "description": "Tender search + AI CPV finder. Register free: 1 daily email alert(s), up to 20 results/search.",
+  "author": {
+    "name": "Scoutee",
+    "url": "https://scoutee.org"
+  },
+  "homepage": "https://scoutee.org/en/mcp-public-tenders",
+  "repository": "https://github.com/qchantel/scoutee-mcp",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

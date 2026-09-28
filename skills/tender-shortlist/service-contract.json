@@ -1,0 +1,3420 @@
+{
+  "version": "1.6.0",
+  "protocol_version": "2025-11-25",
+  "modern_protocol_version": "2026-07-28",
+  "endpoints": {
+    "public-mcp": "https://scoutee.org/api/mcp/public",
+    "workspace-mcp": "https://scoutee.org/api/mcp",
+    "rest": "https://scoutee.org/api/tenders",
+    "cpv-lookup": "https://scoutee.org/api/public/classifications/{system}",
+    "cpv-catalogue": "https://scoutee.org/api/public/classifications/{system}/catalogue",
+    "oauth-register": "https://scoutee.org/api/oauth/register",
+    "oauth-authorize": "https://scoutee.org/api/oauth/authorize",
+    "oauth-token": "https://scoutee.org/api/oauth/token",
+    "oauth-jwks": "https://scoutee.org/api/oauth/jwks",
+    "oauth-userinfo": "https://scoutee.org/api/oauth/userinfo",
+    "oauth-revoke": "https://scoutee.org/api/oauth/revoke"
+  },
+  "oauth_scopes": [
+    "openid",
+    "email",
+    "tenders.read"
+  ],
+  "anonymous_queries": {
+    "limit": 2,
+    "window_seconds": 3600,
+    "window": "rolling",
+    "shared_tools": [
+      "search_public_tenders",
+      "find_cpv_codes"
+    ],
+    "subject": "ip_or_ipv6_64",
+    "persistent": true,
+    "exhausted_code": "anonymous_query_exhausted",
+    "signup_url": "https://scoutee.org/en/signup",
+    "quota_notice": "You've reached your anonymous quota: two queries per hour, shared between tender search and CPV discovery. Create your free Scoutee account to continue now: https://scoutee.org/en/signup. If you already have an account, connect it in your assistant.",
+    "assistant_instructions": "When an anonymous result has quota.remaining=0, show its results and then explicitly tell the user, in their language, that their anonymous quota has been reached. Show a clickable 'Create a free account' link to https://scoutee.org/en/signup as the next step to continue now. Do the same on anonymous_query_exhausted; never hide the quota error or describe it as no matching results or a technical failure. Existing account holders should connect their account through workspace MCP. Account quotas still apply; do not promise unlimited access. Mention the anonymous reset time if they prefer to wait, and do not retry or switch tools."
+  },
+  "email_alerts": {
+    "free": {
+      "active_searches": 1,
+      "results_per_search": 20,
+      "email_preview": 3,
+      "frequency": "daily",
+      "new_matches_only": true
+    },
+    "scope": "One active free alert per account across its workspaces",
+    "signup_url": "https://scoutee.org/en/signup",
+    "manage_url": "https://scoutee.org/en/search-offers",
+    "management_authentication": "Scoutee account session",
+    "mcp_subscription_tool": false
+  },
+  "profiles": {
+    "public-mcp": {
+      "label": "Public MCP",
+      "endpoints": [
+        "public-mcp"
+      ],
+      "auth": [
+        "none"
+      ],
+      "tools": [
+        "search_public_tenders",
+        "get_public_tender",
+        "find_cpv_codes"
+      ],
+      "data_access": "Public previews, custom search and CPV discovery: two shared anonymous queries/hour/IP.",
+      "quota_subject": "anonymous_query:{ip_or_ipv6_64} (shared search/CPV); public_mcp:{ip} (traffic)",
+      "checks": [
+        "connectors:public-mcp"
+      ],
+      "tests": [
+        "tests/functional/test_mcp_public.py",
+        "tests/functional/test_mcp_cpv.py",
+        "tests/functional/test_mcp_protocol.py"
+      ]
+    },
+    "workspace-mcp": {
+      "label": "Workspace MCP",
+      "endpoints": [
+        "workspace-mcp"
+      ],
+      "auth": [
+        "oauth",
+        "api_key"
+      ],
+      "tools": [
+        "search_tenders",
+        "get_tender",
+        "find_cpv_codes"
+      ],
+      "data_access": "Search and full notices; access is limited to reading tenders.",
+      "quota_subject": "oauth:{workspace_id} or key:{key_id}",
+      "checks": [
+        "connectors:workspace-mcp",
+        "connectors:oauth"
+      ],
+      "tests": [
+        "tests/functional/test_mcp.py",
+        "tests/functional/test_oauth.py",
+        "tests/functional/test_errors_and_keys.py",
+        "tests/functional/test_mcp_cpv.py",
+        "tests/functional/test_mcp_protocol.py"
+      ]
+    },
+    "rest": {
+      "label": "REST API",
+      "endpoints": [
+        "rest"
+      ],
+      "auth": [
+        "oauth",
+        "api_key"
+      ],
+      "tools": [
+        "search_tenders",
+        "get_tender"
+      ],
+      "data_access": "Search and full notices in JSON.",
+      "quota_subject": "oauth:{workspace_id} or key:{key_id}",
+      "checks": [
+        "connectors:rest"
+      ],
+      "tests": [
+        "tests/functional/test_errors_and_keys.py",
+        "tests/functional/test_oauth.py"
+      ]
+    },
+    "oauth": {
+      "label": "OAuth",
+      "endpoints": [
+        "oauth-register",
+        "oauth-authorize",
+        "oauth-token",
+        "oauth-jwks",
+        "oauth-userinfo",
+        "oauth-revoke"
+      ],
+      "auth": [
+        "oauth"
+      ],
+      "tools": [],
+      "data_access": "Explicit workspace consent; tenders.read scope on all plans.",
+      "quota_subject": "Workspace plan checked on every call; immediate revocation.",
+      "checks": [
+        "connectors:oauth"
+      ],
+      "tests": [
+        "tests/functional/test_oauth.py"
+      ]
+    }
+  },
+  "cpv": {
+    "name": "Common Procurement Vocabulary",
+    "standard": "Common public procurement standard across the EU",
+    "optional": true,
+    "discovery": {
+      "tool": "find_cpv_codes",
+      "profiles": [
+        "public-mcp",
+        "workspace-mcp"
+      ],
+      "access": "Anonymous public users and authenticated accounts on every plan",
+      "method": "Official catalogue retrieval; the calling assistant selects and explains matches",
+      "limits": {
+        "anonymous_per_hour": 2,
+        "account_per_day": 50,
+        "max_activity_length": 2000,
+        "max_results": 30,
+        "reset_timezone": "UTC",
+        "metering": "daily_per_account; anonymous_hour_shared_with_public_search_per_ip",
+        "scoutee_ai_calls": 0
+      }
+    },
+    "search_parameter": "cpv",
+    "search_profiles": [
+      "rest",
+      "workspace-mcp"
+    ],
+    "catalogue": {
+      "authentication": "none",
+      "lookup_url": "https://scoutee.org/api/public/classifications/cpv",
+      "download_url": "https://scoutee.org/api/public/classifications/cpv/catalogue",
+      "website_url": "https://scoutee.org/en/cpv"
+    },
+    "ai_finder": {
+      "url": "https://scoutee.org/en/find-my-cpv",
+      "authentication": "Free Scoutee account",
+      "description": "AI and Scoutee's knowledge base identify CPV codes for your business."
+    }
+  },
+  "product": {
+    "plans": {
+      "free": {
+        "label": "Gratuit",
+        "purchasable": false,
+        "inherits": null,
+        "included_users": 1,
+        "analyses_per_month": 2,
+        "quota": {
+          "per_hour": 20,
+          "burst_per_minute": 20,
+          "max_page_size": 20,
+          "max_page": 1
+        },
+        "email_alerts": {
+          "active_searches": 1,
+          "results_per_search": 20,
+          "email_preview": 3,
+          "frequency": "daily",
+          "new_matches_only": true
+        },
+        "oauth": true,
+        "api_keys": false,
+        "award_history": false,
+        "prices": {
+          "eur": {
+            "month": 0,
+            "year": 0
+          },
+          "usd": {
+            "month": 0,
+            "year": 0
+          }
+        },
+        "price_keys": {}
+      },
+      "pro": {
+        "label": "Pro",
+        "purchasable": true,
+        "inherits": null,
+        "included_users": 1,
+        "analyses_per_month": 100,
+        "quota": {
+          "per_hour": 100,
+          "burst_per_minute": 10,
+          "max_page_size": 50,
+          "max_page": 20
+        },
+        "email_alerts": {
+          "active_searches": null,
+          "results_per_search": null,
+          "email_preview": 3,
+          "frequency": "daily",
+          "new_matches_only": true
+        },
+        "oauth": true,
+        "api_keys": true,
+        "award_history": false,
+        "prices": {
+          "eur": {
+            "month": 4900,
+            "year": 49000
+          },
+          "usd": {
+            "month": 4900,
+            "year": 49000
+          }
+        },
+        "price_keys": {
+          "month": "pro_monthly",
+          "year": "pro_yearly"
+        }
+      },
+      "team": {
+        "label": "Team",
+        "purchasable": true,
+        "inherits": null,
+        "included_users": 10,
+        "analyses_per_month": null,
+        "quota": {
+          "per_hour": 300,
+          "burst_per_minute": 30,
+          "max_page_size": 100,
+          "max_page": 50
+        },
+        "email_alerts": {
+          "active_searches": null,
+          "results_per_search": null,
+          "email_preview": 3,
+          "frequency": "daily",
+          "new_matches_only": true
+        },
+        "oauth": true,
+        "api_keys": true,
+        "award_history": true,
+        "prices": {
+          "eur": {
+            "month": 14900,
+            "year": 149000
+          },
+          "usd": {
+            "month": 14900,
+            "year": 149000
+          }
+        },
+        "price_keys": {
+          "month": "team_monthly",
+          "year": "team_yearly"
+        }
+      },
+      "standard": {
+        "label": "Standard (legacy)",
+        "purchasable": false,
+        "inherits": "pro",
+        "included_users": 1,
+        "analyses_per_month": 100,
+        "quota": {
+          "per_hour": 100,
+          "burst_per_minute": 10,
+          "max_page_size": 50,
+          "max_page": 20
+        },
+        "email_alerts": {
+          "active_searches": null,
+          "results_per_search": null,
+          "email_preview": 3,
+          "frequency": "daily",
+          "new_matches_only": true
+        },
+        "oauth": true,
+        "api_keys": true,
+        "award_history": false,
+        "prices": {
+          "eur": {
+            "month": 1999,
+            "year": null
+          },
+          "usd": null
+        },
+        "price_keys": {
+          "month": "standard_monthly"
+        }
+      },
+      "premium": {
+        "label": "Beta",
+        "purchasable": false,
+        "inherits": "team",
+        "included_users": 10,
+        "analyses_per_month": null,
+        "quota": {
+          "per_hour": 300,
+          "burst_per_minute": 30,
+          "max_page_size": 100,
+          "max_page": 50
+        },
+        "email_alerts": {
+          "active_searches": null,
+          "results_per_search": null,
+          "email_preview": 3,
+          "frequency": "daily",
+          "new_matches_only": true
+        },
+        "oauth": true,
+        "api_keys": true,
+        "award_history": true,
+        "prices": {
+          "eur": null,
+          "usd": null
+        },
+        "price_keys": {
+          "month": "premium_monthly"
+        }
+      }
+    },
+    "public_plans": [
+      "free",
+      "pro",
+      "team"
+    ],
+    "quotas": {
+      "anonymous": {
+        "per_hour": 60,
+        "burst_per_minute": 12,
+        "max_page_size": 20,
+        "max_page": 3
+      },
+      "visitor_search": {
+        "per_hour": 2,
+        "burst_per_minute": 2,
+        "max_page_size": 20,
+        "max_page": 100000
+      },
+      "public_mcp": {
+        "per_hour": 1200,
+        "burst_per_minute": 60,
+        "max_page_size": 10,
+        "max_page": 3
+      },
+      "free": {
+        "per_hour": 20,
+        "burst_per_minute": 20,
+        "max_page_size": 20,
+        "max_page": 1
+      },
+      "pro": {
+        "per_hour": 100,
+        "burst_per_minute": 10,
+        "max_page_size": 50,
+        "max_page": 20
+      },
+      "team": {
+        "per_hour": 300,
+        "burst_per_minute": 30,
+        "max_page_size": 100,
+        "max_page": 50
+      },
+      "standard": {
+        "per_hour": 100,
+        "burst_per_minute": 10,
+        "max_page_size": 50,
+        "max_page": 20
+      },
+      "premium": {
+        "per_hour": 300,
+        "burst_per_minute": 30,
+        "max_page_size": 100,
+        "max_page": 50
+      }
+    },
+    "search_metering": "per_process_traffic_limit",
+    "cpv_discovery": {
+      "anonymous_per_hour": 2,
+      "account_per_day": 50,
+      "max_activity_length": 2000,
+      "max_results": 30,
+      "reset_timezone": "UTC",
+      "metering": "daily_per_account; anonymous_hour_shared_with_public_search_per_ip",
+      "scoutee_ai_calls": 0
+    },
+    "cpv_company_finder_per_hour": 5,
+    "seat": {
+      "month": 999,
+      "year": 9990
+    },
+    "analysis_pack": {
+      "count": 10,
+      "amount_cents": 1000
+    },
+    "default_tier": "a",
+    "tiers": {
+      "a": {
+        "countries": [],
+        "plans": {
+          "pro": {
+            "month": 4900,
+            "year": 49000
+          },
+          "team": {
+            "month": 14900,
+            "year": 149000
+          }
+        },
+        "seat": {
+          "month": 999,
+          "year": 9990
+        },
+        "analysis_pack_cents": 1000
+      },
+      "b": {
+        "countries": [
+          "CZ",
+          "EE",
+          "ES",
+          "HR",
+          "LT",
+          "PL",
+          "PT",
+          "SI",
+          "SK"
+        ],
+        "plans": {
+          "pro": {
+            "month": 3400,
+            "year": 34000
+          },
+          "team": {
+            "month": 9900,
+            "year": 99000
+          }
+        },
+        "seat": {
+          "month": 699,
+          "year": 6990
+        },
+        "analysis_pack_cents": 700
+      },
+      "c": {
+        "countries": [
+          "BG",
+          "GR",
+          "HU",
+          "LV",
+          "RO"
+        ],
+        "plans": {
+          "pro": {
+            "month": 1999,
+            "year": 19990
+          },
+          "team": {
+            "month": 5999,
+            "year": 59990
+          }
+        },
+        "seat": {
+          "month": 499,
+          "year": 4990
+        },
+        "analysis_pack_cents": 500
+      }
+    }
+  },
+  "tools": {
+    "public-mcp": [
+      {
+        "name": "search_public_tenders",
+        "title": "Search public tenders (free preview)",
+        "description": "Search Scoutee's index of public procurement notices from Europe and North America. No account and no API key needed. Returns up to 10 open notices per page (3 pages at most), the total number of matches and a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look). Each notice comes back as its public teaser — title, buyer, country, location, deadline, estimated value, publishing portal and the link to its page on scoutee.org. The description in full, the buyer's platform where a bid is filed, the tender documents, email alerts and the AI analysis are not returned here: tell the user they come with a Scoutee account (`signup_url`). Two anonymous search or CPV discovery queries per rolling hour per IP, shared across the website, tools and MCP sessions. Custom keywords and filters are supported. Read quota.remaining and quota.resets_at; after exhaustion, wait or connect a free account. When an anonymous result has quota.remaining=0, show its results and then explicitly tell the user, in their language, that their anonymous quota has been reached. Show a clickable 'Create a free account' link to https://scoutee.org/en/signup as the next step to continue now. Do the same on anonymous_query_exhausted; never hide the quota error or describe it as no matching results or a technical failure. Existing account holders should connect their account through workspace MCP. Account quotas still apply; do not promise unlimited access. Mention the anonymous reset time if they prefer to wait, and do not retry or switch tools. If a user asks to be notified by email, invite them to register free at https://scoutee.org/en/signup and save their search on Scoutee. Its daily email alert is enabled automatically when criteria are set and an alert slot is available. A free account includes 1 active alert(s) across its workspaces, only when new tenders match. Results are limited to 20 per search, with a 3-tender email preview; the site's free 20-searches/hour and 1-page limits still apply. Paid plans support alerts for multiple searches. Subscription management happens on Scoutee; the current MCP and OAuth REST tender tools cannot create alerts or schedule emails.",
+        "inputSchema": {
+          "properties": {
+            "q": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Free text over title, buyer and description. Every word must match the *start* of a word in the notice ('nettoy' finds 'nettoyage'); a substring inside a word does not match. Accent- and case-insensitive.",
+              "title": "Q"
+            },
+            "keyword": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Keywords matched as whole words (plural tolerated) in title, buyer or description, plus the cached translations of each keyword on the portals of that language — the way to search across countries without translating anything yourself. Several keywords widen the search (a notice matching any of them is returned).",
+              "title": "Keyword"
+            },
+            "country": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Countries of the publishing portal, by their English name as Scoutee stores it ('France', 'Germany', 'United States', 'Canada'; 'Europe' for TED). Several countries add up. Omit to search everywhere — the `by_country` map of any result lists the exact values in use.",
+              "title": "Country"
+            },
+            "min_value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Minimum estimated value, in the currency of the notice. Notices without a published value remain included when this is set.",
+              "title": "Min Value"
+            },
+            "max_value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Maximum estimated value. Notices without a published value remain included.",
+              "title": "Max Value"
+            },
+            "sort": {
+              "default": "newest",
+              "description": "'newest' (publication descending, the default), 'oldest' (publication ascending) or 'deadline' (soonest submission deadline first).",
+              "enum": [
+                "newest",
+                "oldest",
+                "deadline"
+              ],
+              "title": "Sort",
+              "type": "string"
+            },
+            "page": {
+              "default": 1,
+              "description": "1-based page number, 1 to 3 on this free endpoint.",
+              "maximum": 3,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          "title": "search_public_tenders_toolArguments",
+          "type": "object"
+        },
+        "outputSchema": {
+          "$defs": {
+            "DailyQuota": {
+              "properties": {
+                "limit": {
+                  "title": "Limit",
+                  "type": "integer"
+                },
+                "remaining": {
+                  "title": "Remaining",
+                  "type": "integer"
+                },
+                "resets_at": {
+                  "format": "date-time",
+                  "title": "Resets At",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "limit",
+                "remaining",
+                "resets_at"
+              ],
+              "title": "DailyQuota",
+              "type": "object"
+            },
+            "PublicTender": {
+              "description": "One notice as the public page shows it in its header: the facts, and where to read the rest.",
+              "properties": {
+                "id": {
+                  "title": "Id",
+                  "type": "integer"
+                },
+                "public_key": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Public Key"
+                },
+                "title": {
+                  "title": "Title",
+                  "type": "string"
+                },
+                "buyer": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Buyer"
+                },
+                "country": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Country"
+                },
+                "location": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Location"
+                },
+                "deadline_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Deadline At"
+                },
+                "published_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Published At"
+                },
+                "estimated_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Estimated Value"
+                },
+                "currency": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Currency"
+                },
+                "source_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Source Name"
+                },
+                "url": {
+                  "title": "Url",
+                  "type": "string"
+                },
+                "signup_url": {
+                  "default": "https://scoutee.org/en/signup",
+                  "title": "Signup Url",
+                  "type": "string"
+                },
+                "note": {
+                  "default": "Public preview. Create a free Scoutee account for the full notice. Register and enable one saved search's daily email alert for free, up to 20 results/search. Connect an assistant through OAuth on any plan, subject to the workspace's search quota. Workspace API keys require a paid plan. https://scoutee.org/en/signup",
+                  "title": "Note",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "public_key",
+                "title",
+                "buyer",
+                "country",
+                "location",
+                "deadline_at",
+                "published_at",
+                "estimated_value",
+                "currency",
+                "source_name",
+                "url"
+              ],
+              "title": "PublicTender",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "items": {
+              "items": {
+                "$ref": "#/$defs/PublicTender"
+              },
+              "title": "Items",
+              "type": "array"
+            },
+            "total": {
+              "title": "Total",
+              "type": "integer"
+            },
+            "page": {
+              "title": "Page",
+              "type": "integer"
+            },
+            "page_size": {
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "pages": {
+              "title": "Pages",
+              "type": "integer"
+            },
+            "by_country": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "title": "By Country",
+              "type": "object"
+            },
+            "signup_url": {
+              "default": "https://scoutee.org/en/signup",
+              "title": "Signup Url",
+              "type": "string"
+            },
+            "note": {
+              "default": "Public preview. Create a free Scoutee account for the full notice. Register and enable one saved search's daily email alert for free, up to 20 results/search. Connect an assistant through OAuth on any plan, subject to the workspace's search quota. Workspace API keys require a paid plan. https://scoutee.org/en/signup",
+              "title": "Note",
+              "type": "string"
+            },
+            "quota": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/DailyQuota"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "quota_notice": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Quota Notice"
+            }
+          },
+          "required": [
+            "items",
+            "total",
+            "page",
+            "page_size",
+            "pages"
+          ],
+          "title": "PublicSearchResult",
+          "type": "object"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "get_public_tender",
+        "title": "Read one public tender (free preview)",
+        "description": "The public page of one notice, by its Scoutee identifier (the `id` of a search result). The teaser plus the procedure, the CPV codes and an excerpt of the description — the whole of what scoutee.org shows an anonymous visitor. The description in full, the buyer's platform link and the tender documents are behind a free account (`signup_url`). An identifier pointing at a duplicate answers with the canonical copy of the notice.",
+        "inputSchema": {
+          "properties": {
+            "tender_id": {
+              "description": "Scoutee identifier of the notice.",
+              "title": "Tender Id",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "tender_id"
+          ],
+          "title": "get_public_tender_toolArguments",
+          "type": "object"
+        },
+        "outputSchema": {
+          "description": "`get_public_tender`: the teaser plus the three fields the public page prints below it.",
+          "properties": {
+            "id": {
+              "title": "Id",
+              "type": "integer"
+            },
+            "public_key": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Public Key"
+            },
+            "title": {
+              "title": "Title",
+              "type": "string"
+            },
+            "buyer": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Buyer"
+            },
+            "country": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country"
+            },
+            "location": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Location"
+            },
+            "deadline_at": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Deadline At"
+            },
+            "published_at": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Published At"
+            },
+            "estimated_value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Estimated Value"
+            },
+            "currency": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Currency"
+            },
+            "source_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source Name"
+            },
+            "url": {
+              "title": "Url",
+              "type": "string"
+            },
+            "signup_url": {
+              "default": "https://scoutee.org/en/signup",
+              "title": "Signup Url",
+              "type": "string"
+            },
+            "note": {
+              "default": "Public preview. Create a free Scoutee account for the full notice. Register and enable one saved search's daily email alert for free, up to 20 results/search. Connect an assistant through OAuth on any plan, subject to the workspace's search quota. Workspace API keys require a paid plan. https://scoutee.org/en/signup",
+              "title": "Note",
+              "type": "string"
+            },
+            "procedure": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Procedure"
+            },
+            "cpv_codes": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Cpv Codes",
+              "type": "array"
+            },
+            "excerpt": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Excerpt"
+            }
+          },
+          "required": [
+            "id",
+            "public_key",
+            "title",
+            "buyer",
+            "country",
+            "location",
+            "deadline_at",
+            "published_at",
+            "estimated_value",
+            "currency",
+            "source_name",
+            "url"
+          ],
+          "title": "PublicTenderDetail",
+          "type": "object"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "find_cpv_codes",
+        "title": "Find CPV codes for your activity",
+        "description": "Find official CPV catalogue candidates for the user's actual products, works or services. Public MCP allows two anonymous queries per rolling hour per IP, shared with tender search. Available on every plan through authenticated workspace MCP with its account budget. Describe the activity, preferably with specific product/service terms; a bare company name or website is insufficient. Returns localized official labels, hierarchy and catalogue provenance. Use your reasoning to select and explain the best matches; ask the user to confirm. No company web research or paid Scoutee AI call is triggered. Up to 30 candidates per call. Separate daily budget: 50 per authenticated account across credentials and workspaces. Read quota.remaining and quota.resets_at; do not retry after exhaustion. When an anonymous result has quota.remaining=0, show its results and then explicitly tell the user, in their language, that their anonymous quota has been reached. Show a clickable 'Create a free account' link to https://scoutee.org/en/signup as the next step to continue now. Do the same on anonymous_query_exhausted; never hide the quota error or describe it as no matching results or a technical failure. Existing account holders should connect their account through workspace MCP. Account quotas still apply; do not promise unlimited access. Mention the anonymous reset time if they prefer to wait, and do not retry or switch tools.",
+        "inputSchema": {
+          "properties": {
+            "activity": {
+              "description": "The actual products, works or services supplied. Use specific activity terms; never send private company data.",
+              "maxLength": 2000,
+              "minLength": 3,
+              "title": "Activity",
+              "type": "string"
+            },
+            "locale": {
+              "default": "en",
+              "description": "Official label language, such as en, fr or de; unavailable labels fall back to English.",
+              "pattern": "^[a-z]{2}$",
+              "title": "Locale",
+              "type": "string"
+            }
+          },
+          "required": [
+            "activity"
+          ],
+          "title": "find_cpv_codes_toolArguments",
+          "type": "object"
+        },
+        "outputSchema": {
+          "$defs": {
+            "CatalogueMetadata": {
+              "properties": {
+                "id": {
+                  "title": "Id",
+                  "type": "integer"
+                },
+                "version": {
+                  "description": "Scoutee's versioned catalogue snapshot identifier.",
+                  "title": "Version",
+                  "type": "string"
+                },
+                "nomenclature_version": {
+                  "description": "Official nomenclature edition, such as CPV 2008.",
+                  "title": "Nomenclature Version",
+                  "type": "string"
+                },
+                "sha256": {
+                  "description": "SHA-256 digest of the imported catalogue snapshot.",
+                  "title": "Sha256",
+                  "type": "string"
+                },
+                "source": {
+                  "description": "Official source URL recorded for this catalogue snapshot.",
+                  "title": "Source",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "version",
+                "nomenclature_version",
+                "sha256",
+                "source"
+              ],
+              "title": "CatalogueMetadata",
+              "type": "object"
+            },
+            "ClassificationCodeOut": {
+              "properties": {
+                "code": {
+                  "description": "Eight-digit CPV code accepted by the tender search's cpv parameter.",
+                  "title": "Code",
+                  "type": "string"
+                },
+                "display_code": {
+                  "description": "CPV code including its official check digit.",
+                  "title": "Display Code",
+                  "type": "string"
+                },
+                "label": {
+                  "description": "Catalogue label in the requested language, with English fallback.",
+                  "title": "Label",
+                  "type": "string"
+                },
+                "parent": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Parent code in the official hierarchy, or null at the root.",
+                  "title": "Parent"
+                },
+                "retired": {
+                  "description": "Whether this code has been retired in this catalogue snapshot.",
+                  "title": "Retired",
+                  "type": "boolean"
+                },
+                "replaced_by": {
+                  "description": "Replacement codes recorded in the catalogue, if any.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Replaced By",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "code",
+                "display_code",
+                "label",
+                "parent",
+                "retired",
+                "replaced_by"
+              ],
+              "title": "ClassificationCodeOut",
+              "type": "object"
+            },
+            "DailyQuota": {
+              "properties": {
+                "limit": {
+                  "title": "Limit",
+                  "type": "integer"
+                },
+                "remaining": {
+                  "title": "Remaining",
+                  "type": "integer"
+                },
+                "resets_at": {
+                  "format": "date-time",
+                  "title": "Resets At",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "limit",
+                "remaining",
+                "resets_at"
+              ],
+              "title": "DailyQuota",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "items": {
+              "items": {
+                "$ref": "#/$defs/ClassificationCodeOut"
+              },
+              "title": "Items",
+              "type": "array"
+            },
+            "catalogue": {
+              "$ref": "#/$defs/CatalogueMetadata"
+            },
+            "quota": {
+              "$ref": "#/$defs/DailyQuota"
+            },
+            "signup_url": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Signup Url"
+            },
+            "quota_notice": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Quota Notice"
+            },
+            "guidance": {
+              "default": "These are catalogue candidates, not a final classification. Compare their official labels with the user's actual products and services, explain the strongest matches, and ask the user to confirm before applying codes. Do not infer activities from a company name alone. If no candidate fits, ask for a more precise activity or reformulate using catalogue terminology. CPV applies to European procurement markets; do not substitute it for other classifications.",
+              "title": "Guidance",
+              "type": "string"
+            }
+          },
+          "required": [
+            "items",
+            "catalogue",
+            "quota"
+          ],
+          "title": "CpvDiscoveryResult",
+          "type": "object"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      }
+    ],
+    "workspace-mcp": [
+      {
+        "name": "search_tenders",
+        "title": "Search public tenders",
+        "description": "Search public tenders across Europe and North America by keyword, country, budget, or optional CPV codes for EU procurement. Use find_cpv_codes to discover suitable official codes with the user, available on every plan with a separate daily limit. Returns a page of notices, the total number of matches, a per-country breakdown of the same match set (`by_country`, useful to suggest where else to look) and what the caller's hourly quota has left. Open notices only and newest first unless asked otherwise; notices published on several portals appear once, the other portals listed in `also_on`. Each search consumes one quota unit.",
+        "inputSchema": {
+          "properties": {
+            "q": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Free text over title, buyer and description. Every word must match the *start* of a word in the notice ('nettoy' finds 'nettoyage'); a substring inside a word does not match. Accent- and case-insensitive.",
+              "title": "Q"
+            },
+            "keyword": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Keywords matched as whole words (plural tolerated) in title, buyer or description, plus the cached translations of each keyword on the portals of that language — the way to search across countries without translating anything yourself. Several keywords widen the search (a notice matching any of them is returned).",
+              "title": "Keyword"
+            },
+            "cpv": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 50,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Optional Common Procurement Vocabulary codes, the EU procurement standard (eight digits, optional verified check digit). Includes official descendants and widens keywords with OR; country and budget filters still apply. Only CPV-market sources can match. Validate codes with /api/public/classifications/cpv; unknown codes return an error.",
+              "title": "Cpv"
+            },
+            "country": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Countries of the publishing portal, by their English name as Scoutee stores it ('France', 'Germany', 'United States', 'Canada'; 'Europe' for TED). Several countries add up. Omit to search everywhere — the `by_country` map of any result lists the exact values in use.",
+              "title": "Country"
+            },
+            "min_value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Minimum estimated value, in the currency of the notice. Notices without a published value remain included when this is set.",
+              "title": "Min Value"
+            },
+            "max_value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Maximum estimated value. Notices without a published value remain included.",
+              "title": "Max Value"
+            },
+            "sort": {
+              "default": "newest",
+              "description": "'newest' (publication descending, the default), 'oldest' (publication ascending) or 'deadline' (soonest submission deadline first).",
+              "enum": [
+                "newest",
+                "oldest",
+                "deadline"
+              ],
+              "title": "Sort",
+              "type": "string"
+            },
+            "include_closed": {
+              "default": false,
+              "description": "Include notices whose consultation is already closed.",
+              "title": "Include Closed",
+              "type": "boolean"
+            },
+            "seen_after": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Keep only notices first collected by Scoutee after this instant (ISO 8601). The way to poll for what is new since a previous run.",
+              "title": "Seen After"
+            },
+            "seen_before": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Keep notices first collected at or before this instant; pair with seen_after for a fixed polling window.",
+              "title": "Seen Before"
+            },
+            "page": {
+              "default": 1,
+              "description": "1-based page number.",
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            },
+            "page_size": {
+              "default": 20,
+              "description": "Notices per page, 1 to 200 (capped by the plan). Kept modest by default because a notice is a large object; raise it when you need to sweep a whole result set.",
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          "title": "search_tenders_toolArguments",
+          "type": "object"
+        },
+        "outputSchema": {
+          "$defs": {
+            "AlsoOn": {
+              "description": "Another portal that published the same notice (its copy is hidden from search).",
+              "properties": {
+                "source_id": {
+                  "title": "Source Id",
+                  "type": "integer"
+                },
+                "source_name": {
+                  "title": "Source Name",
+                  "type": "string"
+                },
+                "source_country": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Source Country"
+                },
+                "url": {
+                  "title": "Url",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "source_id",
+                "source_name",
+                "source_country",
+                "url"
+              ],
+              "title": "AlsoOn",
+              "type": "object"
+            },
+            "AnalysisState": {
+              "description": "Where « Analyser l'appel d'offres » stands for this notice (scoutee.api.brief).\n\nOne `tender_briefs` row per *canonical* notice, shared by every workspace: a list can therefore show\nan analysis somebody else started. Just the three fields a row needs — the full `BriefOut` is read\nfrom `GET /tenders/{id}/brief` when the reader opens the notice.",
+              "properties": {
+                "status": {
+                  "title": "Status",
+                  "type": "string"
+                },
+                "step": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Step"
+                },
+                "finished_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Finished At"
+                }
+              },
+              "required": [
+                "status",
+                "step",
+                "finished_at"
+              ],
+              "title": "AnalysisState",
+              "type": "object"
+            },
+            "AwardCriterion": {
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "weight": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight"
+                },
+                "weight_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Value"
+                },
+                "weight_unit": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "percent",
+                        "points"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Unit"
+                },
+                "source": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source"
+                },
+                "lot_number": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Lot Number"
+                },
+                "subcriteria": {
+                  "items": {
+                    "$ref": "#/$defs/CriterionPart"
+                  },
+                  "title": "Subcriteria",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "title": "AwardCriterion",
+              "type": "object"
+            },
+            "BuyerLink": {
+              "properties": {
+                "id": {
+                  "title": "Id",
+                  "type": "integer"
+                },
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "role": {
+                  "title": "Role",
+                  "type": "string"
+                },
+                "favicon_url": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Favicon Url"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "role"
+              ],
+              "title": "BuyerLink",
+              "type": "object"
+            },
+            "CriterionPart": {
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "weight": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight"
+                },
+                "weight_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Value"
+                },
+                "weight_unit": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "percent",
+                        "points"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Unit"
+                },
+                "source": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "title": "CriterionPart",
+              "type": "object"
+            },
+            "DocumentLinkOut": {
+              "description": "One document listed on the buyer's platform, for the user to fetch there.",
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "url": {
+                  "title": "Url",
+                  "type": "string"
+                },
+                "kind": {
+                  "title": "Kind",
+                  "type": "string"
+                },
+                "seen_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Seen At"
+                }
+              },
+              "required": [
+                "name",
+                "url",
+                "kind"
+              ],
+              "title": "DocumentLinkOut",
+              "type": "object"
+            },
+            "ProcurementFacts": {
+              "properties": {
+                "procedure": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Procedure"
+                },
+                "contract_type": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Contract Type"
+                },
+                "execution_location": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Execution Location"
+                },
+                "renewals": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Renewals"
+                },
+                "variants_allowed": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Variants Allowed"
+                },
+                "duration_months": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Duration Months"
+                },
+                "offer_validity_days": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Offer Validity Days"
+                },
+                "questions_deadline_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Questions Deadline At"
+                },
+                "start_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Start At"
+                },
+                "dates": {
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "title": "Dates",
+                  "type": "object"
+                },
+                "budget_text": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Budget Text"
+                },
+                "estimated_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Estimated Value"
+                },
+                "currency": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Currency"
+                },
+                "lots": {
+                  "items": {
+                    "$ref": "#/$defs/ProcurementLot"
+                  },
+                  "title": "Lots",
+                  "type": "array"
+                },
+                "award_criteria": {
+                  "items": {
+                    "$ref": "#/$defs/AwardCriterion"
+                  },
+                  "title": "Award Criteria",
+                  "type": "array"
+                },
+                "mandatory_documents": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Mandatory Documents",
+                  "type": "array"
+                },
+                "requirements": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Requirements",
+                  "type": "array"
+                },
+                "language": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Language"
+                },
+                "confidence": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Confidence"
+                },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source Url"
+                },
+                "updated_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Updated At"
+                }
+              },
+              "title": "ProcurementFacts",
+              "type": "object"
+            },
+            "ProcurementLot": {
+              "properties": {
+                "number": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Number"
+                },
+                "title": {
+                  "title": "Title",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title"
+              ],
+              "title": "ProcurementLot",
+              "type": "object"
+            },
+            "TenderOut": {
+              "properties": {
+                "id": {
+                  "title": "Id",
+                  "type": "integer"
+                },
+                "source_id": {
+                  "title": "Source Id",
+                  "type": "integer"
+                },
+                "public_key": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Public Key"
+                },
+                "source_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source Name"
+                },
+                "source_country": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source Country"
+                },
+                "external_id": {
+                  "title": "External Id",
+                  "type": "string"
+                },
+                "title": {
+                  "title": "Title",
+                  "type": "string"
+                },
+                "buyer": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Buyer"
+                },
+                "buyers": {
+                  "items": {
+                    "$ref": "#/$defs/BuyerLink"
+                  },
+                  "title": "Buyers",
+                  "type": "array"
+                },
+                "description": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Description"
+                },
+                "url": {
+                  "title": "Url",
+                  "type": "string"
+                },
+                "location": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Location"
+                },
+                "procedure": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Procedure"
+                },
+                "cpv_codes": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Cpv Codes",
+                  "type": "array"
+                },
+                "cpv_inferred_codes": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Cpv Inferred Codes",
+                  "type": "array"
+                },
+                "sectors": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Sectors",
+                  "type": "array"
+                },
+                "estimated_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Estimated Value"
+                },
+                "currency": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Currency"
+                },
+                "published_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Published At"
+                },
+                "deadline_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Deadline At"
+                },
+                "first_seen_at": {
+                  "format": "date-time",
+                  "title": "First Seen At",
+                  "type": "string"
+                },
+                "last_seen_at": {
+                  "format": "date-time",
+                  "title": "Last Seen At",
+                  "type": "string"
+                },
+                "closed_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Closed At"
+                },
+                "favorite": {
+                  "default": false,
+                  "title": "Favorite",
+                  "type": "boolean"
+                },
+                "also_on": {
+                  "items": {
+                    "$ref": "#/$defs/AlsoOn"
+                  },
+                  "title": "Also On",
+                  "type": "array"
+                },
+                "documents_url": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Documents Url"
+                },
+                "analysis": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/AnalysisState"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null
+                },
+                "procurement": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/$defs/ProcurementFacts"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null
+                },
+                "document_links": {
+                  "items": {
+                    "$ref": "#/$defs/DocumentLinkOut"
+                  },
+                  "title": "Document Links",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "id",
+                "source_id",
+                "external_id",
+                "title",
+                "buyer",
+                "description",
+                "url",
+                "location",
+                "procedure",
+                "cpv_codes",
+                "sectors",
+                "estimated_value",
+                "currency",
+                "published_at",
+                "deadline_at",
+                "first_seen_at",
+                "last_seen_at",
+                "closed_at"
+              ],
+              "title": "TenderOut",
+              "type": "object"
+            }
+          },
+          "description": "A page of notices plus what the caller's quota has left, the MCP echo of the `X-Quota-*` headers.",
+          "properties": {
+            "items": {
+              "items": {
+                "$ref": "#/$defs/TenderOut"
+              },
+              "title": "Items",
+              "type": "array"
+            },
+            "total": {
+              "title": "Total",
+              "type": "integer"
+            },
+            "page": {
+              "title": "Page",
+              "type": "integer"
+            },
+            "page_size": {
+              "title": "Page Size",
+              "type": "integer"
+            },
+            "pages": {
+              "title": "Pages",
+              "type": "integer"
+            },
+            "by_country": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "title": "By Country",
+              "type": "object"
+            },
+            "by_sector": {
+              "additionalProperties": {
+                "type": "integer"
+              },
+              "title": "By Sector",
+              "type": "object"
+            },
+            "quota_plan": {
+              "title": "Quota Plan",
+              "type": "string"
+            },
+            "quota_limit": {
+              "title": "Quota Limit",
+              "type": "integer"
+            },
+            "quota_remaining": {
+              "title": "Quota Remaining",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "items",
+            "total",
+            "page",
+            "page_size",
+            "pages",
+            "quota_plan",
+            "quota_limit",
+            "quota_remaining"
+          ],
+          "title": "SearchResult",
+          "type": "object"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "get_tender",
+        "title": "Read one public tender",
+        "description": "One notice in full, by its Scoutee identifier (the `id` of a search result). Same shape as a search result. Consumes no quota. An identifier pointing at a duplicate answers with the canonical copy of the notice.",
+        "inputSchema": {
+          "properties": {
+            "tender_id": {
+              "description": "Scoutee identifier of the notice.",
+              "title": "Tender Id",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "tender_id"
+          ],
+          "title": "get_tender_toolArguments",
+          "type": "object"
+        },
+        "outputSchema": {
+          "$defs": {
+            "AlsoOn": {
+              "description": "Another portal that published the same notice (its copy is hidden from search).",
+              "properties": {
+                "source_id": {
+                  "title": "Source Id",
+                  "type": "integer"
+                },
+                "source_name": {
+                  "title": "Source Name",
+                  "type": "string"
+                },
+                "source_country": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Source Country"
+                },
+                "url": {
+                  "title": "Url",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "source_id",
+                "source_name",
+                "source_country",
+                "url"
+              ],
+              "title": "AlsoOn",
+              "type": "object"
+            },
+            "AnalysisState": {
+              "description": "Where « Analyser l'appel d'offres » stands for this notice (scoutee.api.brief).\n\nOne `tender_briefs` row per *canonical* notice, shared by every workspace: a list can therefore show\nan analysis somebody else started. Just the three fields a row needs — the full `BriefOut` is read\nfrom `GET /tenders/{id}/brief` when the reader opens the notice.",
+              "properties": {
+                "status": {
+                  "title": "Status",
+                  "type": "string"
+                },
+                "step": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Step"
+                },
+                "finished_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Finished At"
+                }
+              },
+              "required": [
+                "status",
+                "step",
+                "finished_at"
+              ],
+              "title": "AnalysisState",
+              "type": "object"
+            },
+            "AwardCriterion": {
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "weight": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight"
+                },
+                "weight_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Value"
+                },
+                "weight_unit": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "percent",
+                        "points"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Unit"
+                },
+                "source": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source"
+                },
+                "lot_number": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Lot Number"
+                },
+                "subcriteria": {
+                  "items": {
+                    "$ref": "#/$defs/CriterionPart"
+                  },
+                  "title": "Subcriteria",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "title": "AwardCriterion",
+              "type": "object"
+            },
+            "BuyerLink": {
+              "properties": {
+                "id": {
+                  "title": "Id",
+                  "type": "integer"
+                },
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "role": {
+                  "title": "Role",
+                  "type": "string"
+                },
+                "favicon_url": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Favicon Url"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "role"
+              ],
+              "title": "BuyerLink",
+              "type": "object"
+            },
+            "CriterionPart": {
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "weight": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight"
+                },
+                "weight_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Value"
+                },
+                "weight_unit": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "percent",
+                        "points"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Weight Unit"
+                },
+                "source": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source"
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "title": "CriterionPart",
+              "type": "object"
+            },
+            "DocumentLinkOut": {
+              "description": "One document listed on the buyer's platform, for the user to fetch there.",
+              "properties": {
+                "name": {
+                  "title": "Name",
+                  "type": "string"
+                },
+                "url": {
+                  "title": "Url",
+                  "type": "string"
+                },
+                "kind": {
+                  "title": "Kind",
+                  "type": "string"
+                },
+                "seen_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Seen At"
+                }
+              },
+              "required": [
+                "name",
+                "url",
+                "kind"
+              ],
+              "title": "DocumentLinkOut",
+              "type": "object"
+            },
+            "ProcurementFacts": {
+              "properties": {
+                "procedure": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Procedure"
+                },
+                "contract_type": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Contract Type"
+                },
+                "execution_location": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Execution Location"
+                },
+                "renewals": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Renewals"
+                },
+                "variants_allowed": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Variants Allowed"
+                },
+                "duration_months": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Duration Months"
+                },
+                "offer_validity_days": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Offer Validity Days"
+                },
+                "questions_deadline_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Questions Deadline At"
+                },
+                "start_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Start At"
+                },
+                "dates": {
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "title": "Dates",
+                  "type": "object"
+                },
+                "budget_text": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Budget Text"
+                },
+                "estimated_value": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Estimated Value"
+                },
+                "currency": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Currency"
+                },
+                "lots": {
+                  "items": {
+                    "$ref": "#/$defs/ProcurementLot"
+                  },
+                  "title": "Lots",
+                  "type": "array"
+                },
+                "award_criteria": {
+                  "items": {
+                    "$ref": "#/$defs/AwardCriterion"
+                  },
+                  "title": "Award Criteria",
+                  "type": "array"
+                },
+                "mandatory_documents": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Mandatory Documents",
+                  "type": "array"
+                },
+                "requirements": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Requirements",
+                  "type": "array"
+                },
+                "language": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Language"
+                },
+                "confidence": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Confidence"
+                },
+                "source_url": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Source Url"
+                },
+                "updated_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Updated At"
+                }
+              },
+              "title": "ProcurementFacts",
+              "type": "object"
+            },
+            "ProcurementLot": {
+              "properties": {
+                "number": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Number"
+                },
+                "title": {
+                  "title": "Title",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "title"
+              ],
+              "title": "ProcurementLot",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "id": {
+              "title": "Id",
+              "type": "integer"
+            },
+            "source_id": {
+              "title": "Source Id",
+              "type": "integer"
+            },
+            "public_key": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Public Key"
+            },
+            "source_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Source Name"
+            },
+            "source_country": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Source Country"
+            },
+            "external_id": {
+              "title": "External Id",
+              "type": "string"
+            },
+            "title": {
+              "title": "Title",
+              "type": "string"
+            },
+            "buyer": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Buyer"
+            },
+            "buyers": {
+              "items": {
+                "$ref": "#/$defs/BuyerLink"
+              },
+              "title": "Buyers",
+              "type": "array"
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Description"
+            },
+            "url": {
+              "title": "Url",
+              "type": "string"
+            },
+            "location": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Location"
+            },
+            "procedure": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Procedure"
+            },
+            "cpv_codes": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Cpv Codes",
+              "type": "array"
+            },
+            "cpv_inferred_codes": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Cpv Inferred Codes",
+              "type": "array"
+            },
+            "sectors": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Sectors",
+              "type": "array"
+            },
+            "estimated_value": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Estimated Value"
+            },
+            "currency": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Currency"
+            },
+            "published_at": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Published At"
+            },
+            "deadline_at": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Deadline At"
+            },
+            "first_seen_at": {
+              "format": "date-time",
+              "title": "First Seen At",
+              "type": "string"
+            },
+            "last_seen_at": {
+              "format": "date-time",
+              "title": "Last Seen At",
+              "type": "string"
+            },
+            "closed_at": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Closed At"
+            },
+            "favorite": {
+              "default": false,
+              "title": "Favorite",
+              "type": "boolean"
+            },
+            "also_on": {
+              "items": {
+                "$ref": "#/$defs/AlsoOn"
+              },
+              "title": "Also On",
+              "type": "array"
+            },
+            "documents_url": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Documents Url"
+            },
+            "analysis": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/AnalysisState"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "procurement": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/ProcurementFacts"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null
+            },
+            "document_links": {
+              "items": {
+                "$ref": "#/$defs/DocumentLinkOut"
+              },
+              "title": "Document Links",
+              "type": "array"
+            }
+          },
+          "required": [
+            "id",
+            "source_id",
+            "external_id",
+            "title",
+            "buyer",
+            "description",
+            "url",
+            "location",
+            "procedure",
+            "cpv_codes",
+            "sectors",
+            "estimated_value",
+            "currency",
+            "published_at",
+            "deadline_at",
+            "first_seen_at",
+            "last_seen_at",
+            "closed_at"
+          ],
+          "title": "TenderOut",
+          "type": "object"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "find_cpv_codes",
+        "title": "Find CPV codes for your activity",
+        "description": "Find official CPV catalogue candidates for the user's actual products, works or services. Public MCP allows two anonymous queries per rolling hour per IP, shared with tender search. Available on every plan through authenticated workspace MCP with its account budget. Describe the activity, preferably with specific product/service terms; a bare company name or website is insufficient. Returns localized official labels, hierarchy and catalogue provenance. Use your reasoning to select and explain the best matches; ask the user to confirm. No company web research or paid Scoutee AI call is triggered. Up to 30 candidates per call. Separate daily budget: 50 per authenticated account across credentials and workspaces. Read quota.remaining and quota.resets_at; do not retry after exhaustion. When an anonymous result has quota.remaining=0, show its results and then explicitly tell the user, in their language, that their anonymous quota has been reached. Show a clickable 'Create a free account' link to https://scoutee.org/en/signup as the next step to continue now. Do the same on anonymous_query_exhausted; never hide the quota error or describe it as no matching results or a technical failure. Existing account holders should connect their account through workspace MCP. Account quotas still apply; do not promise unlimited access. Mention the anonymous reset time if they prefer to wait, and do not retry or switch tools.",
+        "inputSchema": {
+          "properties": {
+            "activity": {
+              "description": "The actual products, works or services supplied. Use specific activity terms; never send private company data.",
+              "maxLength": 2000,
+              "minLength": 3,
+              "title": "Activity",
+              "type": "string"
+            },
+            "locale": {
+              "default": "en",
+              "description": "Official label language, such as en, fr or de; unavailable labels fall back to English.",
+              "pattern": "^[a-z]{2}$",
+              "title": "Locale",
+              "type": "string"
+            }
+          },
+          "required": [
+            "activity"
+          ],
+          "title": "find_cpv_codes_toolArguments",
+          "type": "object"
+        },
+        "outputSchema": {
+          "$defs": {
+            "CatalogueMetadata": {
+              "properties": {
+                "id": {
+                  "title": "Id",
+                  "type": "integer"
+                },
+                "version": {
+                  "description": "Scoutee's versioned catalogue snapshot identifier.",
+                  "title": "Version",
+                  "type": "string"
+                },
+                "nomenclature_version": {
+                  "description": "Official nomenclature edition, such as CPV 2008.",
+                  "title": "Nomenclature Version",
+                  "type": "string"
+                },
+                "sha256": {
+                  "description": "SHA-256 digest of the imported catalogue snapshot.",
+                  "title": "Sha256",
+                  "type": "string"
+                },
+                "source": {
+                  "description": "Official source URL recorded for this catalogue snapshot.",
+                  "title": "Source",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "version",
+                "nomenclature_version",
+                "sha256",
+                "source"
+              ],
+              "title": "CatalogueMetadata",
+              "type": "object"
+            },
+            "ClassificationCodeOut": {
+              "properties": {
+                "code": {
+                  "description": "Eight-digit CPV code accepted by the tender search's cpv parameter.",
+                  "title": "Code",
+                  "type": "string"
+                },
+                "display_code": {
+                  "description": "CPV code including its official check digit.",
+                  "title": "Display Code",
+                  "type": "string"
+                },
+                "label": {
+                  "description": "Catalogue label in the requested language, with English fallback.",
+                  "title": "Label",
+                  "type": "string"
+                },
+                "parent": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Parent code in the official hierarchy, or null at the root.",
+                  "title": "Parent"
+                },
+                "retired": {
+                  "description": "Whether this code has been retired in this catalogue snapshot.",
+                  "title": "Retired",
+                  "type": "boolean"
+                },
+                "replaced_by": {
+                  "description": "Replacement codes recorded in the catalogue, if any.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Replaced By",
+                  "type": "array"
+                }
+              },
+              "required": [
+                "code",
+                "display_code",
+                "label",
+                "parent",
+                "retired",
+                "replaced_by"
+              ],
+              "title": "ClassificationCodeOut",
+              "type": "object"
+            },
+            "DailyQuota": {
+              "properties": {
+                "limit": {
+                  "title": "Limit",
+                  "type": "integer"
+                },
+                "remaining": {
+                  "title": "Remaining",
+                  "type": "integer"
+                },
+                "resets_at": {
+                  "format": "date-time",
+                  "title": "Resets At",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "limit",
+                "remaining",
+                "resets_at"
+              ],
+              "title": "DailyQuota",
+              "type": "object"
+            }
+          },
+          "properties": {
+            "items": {
+              "items": {
+                "$ref": "#/$defs/ClassificationCodeOut"
+              },
+              "title": "Items",
+              "type": "array"
+            },
+            "catalogue": {
+              "$ref": "#/$defs/CatalogueMetadata"
+            },
+            "quota": {
+              "$ref": "#/$defs/DailyQuota"
+            },
+            "signup_url": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Signup Url"
+            },
+            "quota_notice": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Quota Notice"
+            },
+            "guidance": {
+              "default": "These are catalogue candidates, not a final classification. Compare their official labels with the user's actual products and services, explain the strongest matches, and ask the user to confirm before applying codes. Do not infer activities from a company name alone. If no candidate fits, ask for a more precise activity or reformulate using catalogue terminology. CPV applies to European procurement markets; do not substitute it for other classifications.",
+              "title": "Guidance",
+              "type": "string"
+            }
+          },
+          "required": [
+            "items",
+            "catalogue",
+            "quota"
+          ],
+          "title": "CpvDiscoveryResult",
+          "type": "object"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        }
+      }
+    ]
+  }
+}
