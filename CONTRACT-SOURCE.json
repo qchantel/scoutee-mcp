@@ -1,7 +1,8 @@
 {
   "source": "Scoutee product repository: scripts/generate_integrations.py",
   "files": {
-    ".claude-plugin/plugin.json": "2bc900d2a66623c330faa923a911862a9050daebd941083d6b475e18766cab33",
+    ".claude-plugin/icon.svg": "6ee6572bb43b0941de6f572f9f47bb20540b2d7fa35414f15a69b63696976486",
+    ".claude-plugin/plugin.json": "1394a6c34ea4fc13f61486e142e00da6e18ab92497f0fe9f33e0bb0ab42843da",
     ".mcp.json": "59d0301adebfb953c63b0533ff6bfbafec1e04a927b021beb77c538a61f2f842",
     "README.md": "db312680bb38ae92d0c7bd2ccbe5dd17741d8eff76e2c7d6fed258b2720e4689",
     "clients/codex-public-mcp.toml": "0509dbd3ebe96c9e43945d2cd0c754e31fd4b5ec00806712489f3a1086a02543",
@@ -21,7 +22,8 @@
     "n8n/README.md": "0c91e8a0a61835b44dd2f9bcd703f116c4c0529fb52d55798e9a18e66409481c",
     "n8n/scoutee-tender-watch.json": "ebac19a79dca644254a13d8a8da45c8c6672807a972430cfbe595d14bd59b725",
     "n8n/validate-window.js": "8c1ddad3e13e11d98c144ecb3ebfeb93c10a9110fb75c45e411125c1fc312143",
-    "plugins/scoutee-procurement/.claude-plugin/plugin.json": "2bc900d2a66623c330faa923a911862a9050daebd941083d6b475e18766cab33",
+    "plugins/scoutee-procurement/.claude-plugin/icon.svg": "6ee6572bb43b0941de6f572f9f47bb20540b2d7fa35414f15a69b63696976486",
+    "plugins/scoutee-procurement/.claude-plugin/plugin.json": "1394a6c34ea4fc13f61486e142e00da6e18ab92497f0fe9f33e0bb0ab42843da",
     "plugins/scoutee-procurement/.codex-plugin/plugin.json": "d278dfeba8cd0290e128d82cdd88c12e6d61da5b3fbdfcdaa4547abecb75ba2e",
     "plugins/scoutee-procurement/.mcp.json": "59d0301adebfb953c63b0533ff6bfbafec1e04a927b021beb77c538a61f2f842",
     "plugins/scoutee-procurement/skills/tender-shortlist/SKILL.md": "eaff827a5efe9105a9694fcd99775175041787500d1a9f7bdf8fe4f6471b0e45",
