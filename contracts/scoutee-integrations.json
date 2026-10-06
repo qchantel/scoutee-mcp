@@ -1434,7 +1434,7 @@
         "outputSchema": {
           "$defs": {
             "AlsoOn": {
-              "description": "Another portal that published the same notice (its copy is hidden from search).",
+              "description": "Another portal carrying the same notice: an older merged copy, or another open copy of its group\n(scoutee.notice_groups). Both are listed here, never hidden from search; a search lists one copy.",
               "properties": {
                 "source_id": {
                   "title": "Source Id",
@@ -1458,6 +1458,31 @@
                 "url": {
                   "title": "Url",
                   "type": "string"
+                },
+                "tender_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Tender Id"
+                },
+                "deadline_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Deadline At"
                 }
               },
               "required": [
@@ -1617,6 +1642,18 @@
                   ],
                   "default": null,
                   "title": "Favicon Url"
+                },
+                "reported_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Reported Name"
                 }
               },
               "required": [
@@ -2366,7 +2403,7 @@
         "outputSchema": {
           "$defs": {
             "AlsoOn": {
-              "description": "Another portal that published the same notice (its copy is hidden from search).",
+              "description": "Another portal carrying the same notice: an older merged copy, or another open copy of its group\n(scoutee.notice_groups). Both are listed here, never hidden from search; a search lists one copy.",
               "properties": {
                 "source_id": {
                   "title": "Source Id",
@@ -2390,6 +2427,31 @@
                 "url": {
                   "title": "Url",
                   "type": "string"
+                },
+                "tender_id": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Tender Id"
+                },
+                "deadline_at": {
+                  "anyOf": [
+                    {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Deadline At"
                 }
               },
               "required": [
@@ -2549,6 +2611,18 @@
                   ],
                   "default": null,
                   "title": "Favicon Url"
+                },
+                "reported_name": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Reported Name"
                 }
               },
               "required": [
