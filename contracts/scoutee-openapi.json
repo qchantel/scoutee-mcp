@@ -1276,6 +1276,19 @@
             ],
             "title": "Lot Number"
           },
+          "score_max": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000000.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score Max"
+          },
           "subcriteria": {
             "items": {
               "$ref": "#/components/schemas/CriterionPart"

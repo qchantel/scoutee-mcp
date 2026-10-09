@@ -1603,6 +1603,20 @@
                   "default": null,
                   "title": "Lot Number"
                 },
+                "score_max": {
+                  "anyOf": [
+                    {
+                      "exclusiveMinimum": 0,
+                      "maximum": 1000000,
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Score Max"
+                },
                 "subcriteria": {
                   "items": {
                     "$ref": "#/$defs/CriterionPart"
@@ -2571,6 +2585,20 @@
                   ],
                   "default": null,
                   "title": "Lot Number"
+                },
+                "score_max": {
+                  "anyOf": [
+                    {
+                      "exclusiveMinimum": 0,
+                      "maximum": 1000000,
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "default": null,
+                  "title": "Score Max"
                 },
                 "subcriteria": {
                   "items": {
