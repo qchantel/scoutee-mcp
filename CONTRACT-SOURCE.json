@@ -13,7 +13,7 @@
     "clients/vscode-public-mcp.json": "7be33d677ab23090295ce11b1a67b729c0a66d5378bb28f350b6cfd9e4c754b8",
     "clients/vscode-workspace-mcp.json": "faf54f12c65e9c649977ee4d03eec8b550d983b5d84cc30c7295161d40753127",
     "clients/workspace-mcp.json": "2229505d97e4361af7d1c640a1b5eda304a3ab9e5b2afd6847112af298654ada",
-    "contracts/scoutee-integrations.json": "d503e238dd9dbb0a59c2b87a6ff12c8e946ffb872df7e94d7f604e12cbeefb2f",
+    "contracts/scoutee-integrations.json": "2fe76e870dc2beb09ea5eb97f953950e18269b858e917782edff8ace40f90719",
     "contracts/scoutee-openapi.json": "32909616a4c5da0641f49098b7dd5fc86ae18660cae1afd1b947248f01e93fc4",
     "docker/scoutee/readme.md": "e98194e572eda4ac440fb7290d96a01b1e8348321f2b83a18276abff276ebfa7",
     "docker/scoutee/server.yaml": "af1fc220ff296900e9d50b66b2f52b1ef0e3ee81bdda5503fad0604b63d1e94a",
@@ -27,9 +27,9 @@
     "plugins/scoutee-procurement/.codex-plugin/plugin.json": "d278dfeba8cd0290e128d82cdd88c12e6d61da5b3fbdfcdaa4547abecb75ba2e",
     "plugins/scoutee-procurement/.mcp.json": "59d0301adebfb953c63b0533ff6bfbafec1e04a927b021beb77c538a61f2f842",
     "plugins/scoutee-procurement/skills/tender-shortlist/SKILL.md": "eaff827a5efe9105a9694fcd99775175041787500d1a9f7bdf8fe4f6471b0e45",
-    "plugins/scoutee-procurement/skills/tender-shortlist/service-contract.json": "d503e238dd9dbb0a59c2b87a6ff12c8e946ffb872df7e94d7f604e12cbeefb2f",
+    "plugins/scoutee-procurement/skills/tender-shortlist/service-contract.json": "2fe76e870dc2beb09ea5eb97f953950e18269b858e917782edff8ace40f90719",
     "server.json": "5d7864bc34bd47a2480584667e858c41b4f7da9715cbbd7fb6a14497cacfc72a",
     "skills/tender-shortlist/SKILL.md": "eaff827a5efe9105a9694fcd99775175041787500d1a9f7bdf8fe4f6471b0e45",
-    "skills/tender-shortlist/service-contract.json": "d503e238dd9dbb0a59c2b87a6ff12c8e946ffb872df7e94d7f604e12cbeefb2f"
+    "skills/tender-shortlist/service-contract.json": "2fe76e870dc2beb09ea5eb97f953950e18269b858e917782edff8ace40f90719"
   }
 }
