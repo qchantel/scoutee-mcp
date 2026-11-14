@@ -362,6 +362,12 @@
         }
       }
     },
+    "fr_named_monthly": {
+      "offer": "fr_named_monthly",
+      "first_cents": 999,
+      "extra_cents": 800,
+      "analyses_per_seat": 20
+    },
     "public_plans": [
       "free",
       "pro",
