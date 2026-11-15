@@ -1712,11 +1712,17 @@
             },
             "type": "object",
             "title": "Plans"
+          },
+          "named_monthly": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Named Monthly"
           }
         },
         "type": "object",
         "required": [
-          "plans"
+          "plans",
+          "named_monthly"
         ],
         "title": "Plans"
       },

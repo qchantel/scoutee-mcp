@@ -226,7 +226,7 @@
       },
       "pro": {
         "label": "Pro",
-        "purchasable": true,
+        "purchasable": false,
         "inherits": null,
         "included_users": 1,
         "analyses_per_month": 100,
@@ -263,7 +263,7 @@
       },
       "team": {
         "label": "Team",
-        "purchasable": true,
+        "purchasable": false,
         "inherits": null,
         "included_users": 10,
         "analyses_per_month": null,
@@ -362,7 +362,14 @@
         }
       }
     },
-    "fr_named_monthly": {
+    "named_monthly": {
+      "scope": "global",
+      "currency": "eur",
+      "interval": "month",
+      "tax_behavior": "exclusive",
+      "plan": "team",
+      "included_users": 1,
+      "purchasable": true,
       "offer": "fr_named_monthly",
       "first_cents": 999,
       "extra_cents": 800,
@@ -370,7 +377,6 @@
     },
     "public_plans": [
       "free",
-      "pro",
       "team"
     ],
     "quotas": {
